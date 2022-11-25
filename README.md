@@ -2,6 +2,8 @@
 
 Edit PowerShell scripts directly in your terminal. 
 
+![](./screenshot.png)
+
 - IntelliSense
 - Syntax Higlighting
 - Format on Save
