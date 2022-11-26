@@ -187,10 +187,14 @@ namespace psedit
         {
             try
             {
-                var formatted = InvokeCommand.InvokeScript("Invoke-Formatter -ScriptDefinition $args[0]", textEditor.Text.ToString()).FirstOrDefault();
-                if (formatted != null)
+                var formatValue = textEditor.Text.ToString();
+                if (!System.String.IsNullOrEmpty(formatValue))
                 {
-                    textEditor.Text = formatted.BaseObject as string;
+                    var formatted = InvokeCommand.InvokeScript("Invoke-Formatter -ScriptDefinition $args[0]", formatValue).FirstOrDefault();
+                    if (formatted != null)
+                    {
+                        textEditor.Text = formatted.BaseObject as string;
+                    }
                 }
             }
             catch (Exception ex)
