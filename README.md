@@ -52,3 +52,7 @@ You can also use the Debug menu to access these options.
 ### Errors
 
 Errors generated when running scripts will be shown in the error window. You can access it by clicking View \ Errors.
+
+### Ironman Software Free Tools
+
+For more free tools, visit the [Ironman Software free tools index](https://ironmansoftware.com/free-powershell-tools). 
