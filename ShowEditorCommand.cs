@@ -103,7 +103,7 @@ namespace psedit
                         new MenuItem ("_Quit", "", () => {
                             try
                             {
-                                Application.Shutdown();
+                                Application.RequestStop();
                             }
                             catch {}
                         }, shortcut: Key.CtrlMask | Key.Q)
@@ -161,6 +161,7 @@ namespace psedit
             try
             {
                 Application.Run();
+                Application.Shutdown();
             }
             catch { }
             finally
