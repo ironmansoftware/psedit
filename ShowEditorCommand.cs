@@ -10,6 +10,7 @@ using Terminal.Gui;
 namespace psedit
 {
     [Cmdlet("Show", "PSEditor")]
+    [Alias("psedit")]
     public class ShowEdtiorCommand : PSCmdlet
     {
         private PowerShellEditorTextView textEditor;
@@ -20,8 +21,9 @@ namespace psedit
         private Toplevel top;
         private Runspace _runspace;
 
-        [Parameter(ParameterSetName = "Path", ValueFromPipeline = true)]
+        [Parameter(ParameterSetName = "Path", ValueFromPipeline = true, Position = 0)]
         public string Path { get; set; }
+
         [Parameter()]
         public SwitchParameter DisableFormatOnSave { get; set; }
 
