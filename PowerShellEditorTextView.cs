@@ -45,7 +45,18 @@ namespace psedit
             }
             else if (hasError)
             {
-                Errors.TryAdd(new Point(column, line), error);
+                // Verify if error has already been reported
+                var foundError = Errors.Where( err => 
+                                                error.Extent.StartColumnNumber == err.Value.Extent.StartColumnNumber &&
+                                                error.Extent.EndColumnNumber == err.Value.Extent.EndColumnNumber &&
+                                                error.Extent.StartLineNumber == err.Value.Extent.StartLineNumber &&
+                                                error.Extent.EndLineNumber == err.Value.Extent.EndLineNumber);
+
+                if (!foundError.Any())
+                {
+                    Errors.TryAdd(new Point(column, line), error);
+                }
+
                 background = Color.Red;
             }
 
