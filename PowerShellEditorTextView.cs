@@ -363,11 +363,11 @@ namespace psedit
                     offset += host.Runes[lineOffset].Count + Environment.NewLine.Length;
                 }
             }
-
             var text = host.Text.ToString();
 
-            if (text.Length == 0 || offset == 0)
+            if (text.Length == 0 || offset == 0  || host.CurrentColumn == 0)
             {
+                ClearSuggestions();
                 return;
             }
 
@@ -383,7 +383,14 @@ namespace psedit
                 if (_suggestions != null)
                 {
                     var word = GetCurrentWord();
-                    Suggestions = _suggestions.Where(m => m.StartsWith(word, StringComparison.OrdinalIgnoreCase)).ToList().AsReadOnly();
+                    if (!System.String.IsNullOrEmpty(word))
+                    {
+                        Suggestions = _suggestions.Where(m => m.StartsWith(word, StringComparison.OrdinalIgnoreCase)).ToList().AsReadOnly();
+                    }
+                    else 
+                    {
+                        ClearSuggestions();
+                    }
                 }
 
                 return;
