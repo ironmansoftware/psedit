@@ -20,7 +20,7 @@ namespace psedit
 
             foreach (var error in errors)
             {
-                dataTable.Rows.Add(error.Extent.StartLineNumber, error.Extent.EndLineNumber, error.Message);
+                dataTable.Rows.Add(error.Extent.StartLineNumber, error.Extent.StartColumnNumber, error.Message);
 
             }
 
