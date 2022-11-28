@@ -29,7 +29,8 @@ namespace psedit
                 m.Extent.StartLineNumber <= (line + 1) &&
                 m.Extent.EndLineNumber >= (line + 1) &&
                 m.Extent.StartColumnNumber <= (column + 1) &&
-                m.Extent.EndColumnNumber >= (column + 1));
+                m.Extent.EndColumnNumber >= (column + 1) &&
+                m.Kind != TokenKind.NewLine);
 
             var error = _errors?.FirstOrDefault(m => m.Extent.StartLineNumber <= (line + 1) &&
                 m.Extent.EndLineNumber >= (line + 1) &&
