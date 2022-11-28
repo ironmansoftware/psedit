@@ -25,7 +25,7 @@ jobs:
         dotnet-version: 6.0.x
 
     - name: Build
-      run: dotnet build -o psedit
+      run: dotnet publish -o psedit
 
     - name: Release
       run: Publish-Module -Path .\psedit -NuGetApiKey $Env:APIKEY
