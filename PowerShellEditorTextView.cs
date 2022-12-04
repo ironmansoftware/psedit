@@ -23,20 +23,79 @@ namespace psedit
             Autocomplete.MaxHeight = 10;
         }
 
-        public void ColorToken(Token[] tokens, int line, int column, bool selection)
+        public Terminal.Gui.Attribute GetColor(Token token, Color background)
         {
-            var token = tokens.FirstOrDefault(m =>
-                m.Extent.StartLineNumber <= (line + 1) &&
-                m.Extent.EndLineNumber >= (line + 1) &&
-                m.Extent.StartColumnNumber <= (column + 1) &&
-                m.Extent.EndColumnNumber >= (column + 1) &&
-                m.Kind != TokenKind.NewLine);
+            Color textColor;
+            textColor = Color.White;
 
-            var error = _errors?.FirstOrDefault(m => m.Extent.StartLineNumber <= (line + 1) &&
-                m.Extent.EndLineNumber >= (line + 1) &&
-                m.Extent.StartColumnNumber <= (column + 1) &&
-                m.Extent.EndColumnNumber >= (column + 1));
+            if (token != null)
+            {
+                switch (token.Kind)
+                {
+                    case TokenKind.If:
+                        textColor = Color.White;
+                        break;
+                    case TokenKind.Else:
+                        textColor = Color.White;
+                        break;
+                    case TokenKind.LCurly:
+                        textColor = Color.BrightYellow;
+                        break;
+                    case TokenKind.RCurly:
+                        textColor = Color.BrightYellow;
+                        break;
+                    case TokenKind.LParen:
+                        textColor = Color.White;
+                        break;
+                    case TokenKind.RParen:
+                        textColor = Color.White;
+                        break;
+                    case TokenKind.Parameter:
+                        textColor = Color.White;
+                        break;
+                    case TokenKind.Identifier:
+                        textColor = Color.BrightYellow;
+                        break;
+                    case TokenKind.Equals:
+                        textColor = Color.White;
+                        break;
+                    case TokenKind.Param:
+                        textColor = Color.White;
+                        break;
+                    case TokenKind.Function:
+                        textColor = Color.BrightBlue;
+                        break;
+                    case TokenKind.StringExpandable:
+                    case TokenKind.StringLiteral:
+                    case TokenKind.HereStringExpandable:
+                    case TokenKind.HereStringLiteral:
+                        textColor = Color.Brown;
+                        break;
+                    case TokenKind.Variable:
+                        textColor = Color.Cyan;
+                        break;
+                    case TokenKind.Comment:
+                        textColor = Color.Green;
+                        break;
+                    case TokenKind.Command:
+                    case TokenKind.Generic:
+                        if (token.TokenFlags == TokenFlags.CommandName)
+                            textColor = Color.BrightYellow;
+                        else
+                            textColor = Color.Gray;
 
+                        break;
+                    default:
+                        textColor = Color.White;
+                        break;
+                }
+            }
+
+            return Terminal.Gui.Attribute.Make(textColor, background);
+        }
+
+        public void ColorToken(Token token, ParseError error, int line, int column, bool selection)
+        {
             var hasError = error != null;
 
             var background = Color.Black;
@@ -60,43 +119,10 @@ namespace psedit
 
                 background = Color.Red;
             }
+            
+            var attributeColors = GetColor(token, background);
+            Driver.SetAttribute(attributeColors);
 
-            if (token != null)
-            {
-                switch (token.Kind)
-                {
-                    case TokenKind.StringExpandable:
-                    case TokenKind.StringLiteral:
-                    case TokenKind.HereStringExpandable:
-                    case TokenKind.HereStringLiteral:
-                        Driver.SetAttribute(Terminal.Gui.Attribute.Make(Color.Brown, background));
-                        break;
-                    case TokenKind.Variable:
-                        Driver.SetAttribute(Terminal.Gui.Attribute.Make(Color.BrightBlue, background));
-                        break;
-                    case TokenKind.Comment:
-                        Driver.SetAttribute(Terminal.Gui.Attribute.Make(Color.Green, background));
-                        break;
-                    case TokenKind.Command:
-                    case TokenKind.Generic:
-                        Driver.SetAttribute(Terminal.Gui.Attribute.Make(Color.Gray, background));
-                        break;
-                    default:
-                        if (selection)
-                        {
-                            Driver.SetAttribute(Terminal.Gui.Attribute.Make(Color.Black, background));
-                            break;
-                        }
-                        else if (hasError)
-                        {
-                            Driver.SetAttribute(Terminal.Gui.Attribute.Make(Color.Black, background));
-                            break;
-                        }
-
-                        ColorNormal();
-                        break;
-                }
-            }
         }
 
         public List<List<Rune>> Runes { get; private set; }
@@ -121,11 +147,35 @@ namespace psedit
                 int lineRuneCount = line.Count;
                 var col = 0;
 
+                // identify token for specific row
+                var rowTokens = tokens.Where(m =>
+                    m.Extent.StartLineNumber == (idxRow + 1) ||
+                    m.Extent.EndLineNumber >= (idxRow + 1));
+                
+                var rowErrors = _errors?.Where(m => 
+                    m.Extent.StartLineNumber == (idxRow + 1));
+
+                var tokenCol = 1;
+
                 Move(0, row);
                 for (int idxCol = LeftColumn; idxCol < lineRuneCount; idxCol++)
                 {
+                    // identify rows with runes
                     var rune = idxCol >= lineRuneCount ? ' ' : line[idxCol];
                     var cols = Rune.ColumnWidth(rune);
+
+                    // get token, note that we must provide +1 for the end column, as Start will be 1 and End will be 2 for the example: A
+                    var colToken = rowTokens.FirstOrDefault(m =>
+                        (m.Extent.StartColumnNumber <= (tokenCol) &&
+                        m.Extent.EndColumnNumber >= (tokenCol + 1)) &&
+                        m.Kind != TokenKind.NewLine);
+
+                    // get any errors
+                    var colError = rowErrors?.FirstOrDefault(m =>
+                        m.Extent.StartColumnNumber <= (tokenCol) &&
+                        m.Extent.EndColumnNumber <= (tokenCol)
+                        );
+
                     if (idxCol < line.Count && Selecting && PointInSelection(idxCol, idxRow))
                     {
                         ColorSelection(line, idxCol);
@@ -147,19 +197,21 @@ namespace psedit
                         {
                             cols = right - col;
                         }
-                        for (int i = 0; i < cols; i++)
+                        for (int i = 1; i < cols; i++)
                         {
                             if (col + i < right)
                             {
-                                ColorToken(tokens, row, col + i, Selecting && PointInSelection(idxCol, idxRow));
-                                AddRune(col + i, row, ' ');
+                                ColorToken(colToken, colError, row, col, Selecting && PointInSelection(idxCol, idxRow));
+                                AddRune(col, row, ' ');
                             }
                         }
+                        tokenCol++;
                     }
-                    else
+                    else 
                     {
-                        ColorToken(tokens, row, col, Selecting && PointInSelection(idxCol, idxRow));
+                        ColorToken(colToken, colError, row, col, Selecting && PointInSelection(idxCol, idxRow));
                         AddRune(col, row, rune);
+                        tokenCol++;
                     }
                     if (!SetCol(ref col, bounds.Right, cols))
                     {
