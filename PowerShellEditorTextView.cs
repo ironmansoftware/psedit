@@ -149,8 +149,12 @@ namespace psedit
 
                 // identify token for specific row
                 var rowTokens = tokens.Where(m =>
+                    // single line token
                     m.Extent.StartLineNumber == (idxRow + 1) ||
-                    m.Extent.EndLineNumber >= (idxRow + 1));
+                    // multiline token
+                    (m.Extent.EndLineNumber >= (idxRow + 1) &&
+                        m.Extent.StartLineNumber <= (idxRow + 1)
+                    ));
                 
                 var rowErrors = _errors?.Where(m => 
                     m.Extent.StartLineNumber == (idxRow + 1));
@@ -166,9 +170,17 @@ namespace psedit
 
                     // get token, note that we must provide +1 for the end column, as Start will be 1 and End will be 2 for the example: A
                     var colToken = rowTokens.FirstOrDefault(m =>
-                        (m.Extent.StartColumnNumber <= (tokenCol) &&
-                        m.Extent.EndColumnNumber >= (tokenCol + 1)) &&
-                        m.Kind != TokenKind.NewLine);
+                        // single line token
+                        (((m.Extent.StartColumnNumber <= (tokenCol) &&
+                        m.Extent.EndColumnNumber >= (tokenCol + 1) &&
+                        m.Extent.StartLineNumber == (idxRow + 1))) ||
+                        // multiline token
+                        (m.Extent.EndLineNumber >= (idxRow + 1) &&
+                            m.Extent.StartLineNumber <= (idxRow + 1) &&
+                            m.Extent.StartLineNumber != (idxRow + 1))) &&
+                        m.Kind != TokenKind.NewLine
+                        );
+
 
                     // get any errors
                     var colError = rowErrors?.FirstOrDefault(m =>
