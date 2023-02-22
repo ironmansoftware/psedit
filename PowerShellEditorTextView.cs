@@ -143,6 +143,10 @@ namespace psedit
             var row = 0;
             for (int idxRow = TopRow; idxRow < Runes.Count; idxRow++)
             {
+                if (row > bottom)
+                {
+                    break;
+                }
                 var line = GetLine(Runes, idxRow);
                 int lineRuneCount = line.Count;
                 var col = 0;
