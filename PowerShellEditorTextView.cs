@@ -159,7 +159,7 @@ namespace psedit
                 var rowErrors = _errors?.Where(m => 
                     m.Extent.StartLineNumber == (idxRow + 1));
 
-                var tokenCol = 1;
+                var tokenCol = 1 + LeftColumn;
 
                 Move(0, row);
                 for (int idxCol = LeftColumn; idxCol < lineRuneCount; idxCol++)
