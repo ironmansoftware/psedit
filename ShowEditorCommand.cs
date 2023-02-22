@@ -11,7 +11,7 @@ namespace psedit
 {
     [Cmdlet("Show", "PSEditor")]
     [Alias("psedit")]
-    public class ShowEdtiorCommand : PSCmdlet
+    public class ShowEditorCommand : PSCmdlet
     {
         private PowerShellEditorTextView textEditor;
         private StatusBar statusBar;
