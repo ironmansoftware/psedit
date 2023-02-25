@@ -190,10 +190,16 @@ namespace psedit
                 var formatValue = textEditor.Text.ToString();
                 if (!System.String.IsNullOrEmpty(formatValue))
                 {
-                    var formatted = InvokeCommand.InvokeScript("Invoke-Formatter -ScriptDefinition $args[0]", formatValue).FirstOrDefault();
-                    if (formatted != null)
+                    using (var powerShell = PowerShell.Create(RunspaceMode.CurrentRunspace))
                     {
-                        textEditor.Text = formatted.BaseObject as string;
+                        powerShell.AddCommand("Invoke-Formatter");
+                        powerShell.AddParameter("ScriptDefinition", formatValue);
+                        var result = powerShell.Invoke();
+                        var formatted = result.FirstOrDefault();
+                        if (formatted != null)
+                        {
+                            textEditor.Text = formatted.BaseObject as string;
+                        }
                     }
                 }
             }
