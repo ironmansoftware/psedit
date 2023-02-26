@@ -392,9 +392,9 @@ namespace psedit
 
         private void UpdatePosition()
         {
-            if (textEditor.Errors.ContainsKey(textEditor.CursorPosition))
+            if (textEditor.ColumnErrors.ContainsKey(textEditor.CursorPosition))
             {
-                cursorStatus.Title = textEditor.Errors[textEditor.CursorPosition].Message;
+                cursorStatus.Title = textEditor.ColumnErrors[textEditor.CursorPosition];
             }
             else
             {

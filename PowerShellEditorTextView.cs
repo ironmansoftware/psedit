@@ -14,6 +14,7 @@ namespace psedit
     public class PowerShellEditorTextView : TextView
     {
         public ConcurrentDictionary<Point, ParseError> Errors { get; set; } = new ConcurrentDictionary<Point, ParseError>();
+        public ConcurrentDictionary<Point, string> ColumnErrors { get; set; } = new ConcurrentDictionary<Point, string>();
         private ParseError[] _errors;
 
         public PowerShellEditorTextView(Runspace runspace)
@@ -187,6 +188,11 @@ namespace psedit
                         m.Extent.StartColumnNumber <= (tokenCol) &&
                         m.Extent.EndColumnNumber <= (tokenCol)
                         );
+
+                    if (colError != null)
+                    {
+                        ColumnErrors.TryAdd(new Point(idxCol, idxRow), colError.Message);
+                    }
 
                     if (idxCol < line.Count && Selecting && PointInSelection(idxCol, idxRow))
                     {
