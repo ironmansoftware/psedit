@@ -75,7 +75,7 @@ namespace psedit
 
                             Application.Run(dialog);
 
-                            if (dialog.FilePath.IsEmpty)
+                            if (dialog.FilePath.IsEmpty || dialog.Canceled == true)
                             {
                                 return;
                             }
@@ -367,8 +367,10 @@ namespace psedit
                 dialog.AllowedFileTypes = new string[] { ".ps1" };
                 Application.Run(dialog);
 
-                if (dialog.FilePath.IsEmpty || Directory.Exists(dialog.FilePath.ToString())) return;
-
+                if (dialog.FilePath.IsEmpty || dialog.Canceled == true || Directory.Exists(dialog.FilePath.ToString()))
+                {
+                    return;
+                }
                 Path = dialog.FilePath.ToString();
                 fileNameStatus.Title = Path;
             }
