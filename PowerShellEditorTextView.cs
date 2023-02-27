@@ -105,18 +105,6 @@ namespace psedit
             }
             else if (hasError)
             {
-                // Verify if error has already been reported
-                var foundError = Errors.Where( err => 
-                                                error.Extent.StartColumnNumber == err.Value.Extent.StartColumnNumber &&
-                                                error.Extent.EndColumnNumber == err.Value.Extent.EndColumnNumber &&
-                                                error.Extent.StartLineNumber == err.Value.Extent.StartLineNumber &&
-                                                error.Extent.EndLineNumber == err.Value.Extent.EndLineNumber);
-
-                if (!foundError.Any())
-                {
-                    Errors.TryAdd(new Point(column, line), error);
-                }
-
                 background = Color.Red;
             }
             
@@ -134,7 +122,20 @@ namespace psedit
             Errors.Clear();
             _errors = errors;
             Runes = StringToRunes(text);
+            foreach (var error in _errors) 
+            {
+                // Verify if error has already been reported
+                var foundError = Errors.Where( err => 
+                                                error.Extent.StartColumnNumber == err.Value.Extent.StartColumnNumber &&
+                                                error.Extent.EndColumnNumber == err.Value.Extent.EndColumnNumber &&
+                                                error.Extent.StartLineNumber == err.Value.Extent.StartLineNumber &&
+                                                error.Extent.EndLineNumber == err.Value.Extent.EndLineNumber);
 
+                if (!foundError.Any())
+                {
+                    Errors.TryAdd(new Point(error.Extent.StartColumnNumber, error.Extent.StartLineNumber), error);
+                }
+            }
             ColorNormal();
 
             var offB = OffSetBackground();
@@ -143,6 +144,10 @@ namespace psedit
             var row = 0;
             for (int idxRow = TopRow; idxRow < Runes.Count; idxRow++)
             {
+                if (row > bottom)
+                {
+                    break;
+                }
                 var line = GetLine(Runes, idxRow);
                 int lineRuneCount = line.Count;
                 var col = 0;
@@ -159,7 +164,7 @@ namespace psedit
                 var rowErrors = _errors?.Where(m => 
                     m.Extent.StartLineNumber == (idxRow + 1));
 
-                var tokenCol = 1;
+                var tokenCol = 1 + LeftColumn;
 
                 Move(0, row);
                 for (int idxCol = LeftColumn; idxCol < lineRuneCount; idxCol++)

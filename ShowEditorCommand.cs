@@ -75,7 +75,7 @@ namespace psedit
 
                             Application.Run(dialog);
 
-                            if (dialog.FilePath.IsEmpty)
+                            if (dialog.FilePath.IsEmpty || dialog.Canceled == true)
                             {
                                 return;
                             }
@@ -190,6 +190,8 @@ namespace psedit
                 var formatValue = textEditor.Text.ToString();
                 if (!System.String.IsNullOrEmpty(formatValue))
                 {
+                    var previousCursorPosition = textEditor.CursorPosition;
+                    var previousTopRow = textEditor.TopRow;
                     using (var powerShell = PowerShell.Create(RunspaceMode.CurrentRunspace))
                     {
                         powerShell.AddCommand("Invoke-Formatter");
@@ -199,6 +201,8 @@ namespace psedit
                         if (formatted != null)
                         {
                             textEditor.Text = formatted.BaseObject as string;
+                            textEditor.CursorPosition = previousCursorPosition;
+                            textEditor.TopRow = previousTopRow;
                         }
                     }
                 }
@@ -373,8 +377,10 @@ namespace psedit
                 dialog.AllowedFileTypes = new string[] { ".ps1" };
                 Application.Run(dialog);
 
-                if (dialog.FilePath.IsEmpty || Directory.Exists(dialog.FilePath.ToString())) return;
-
+                if (dialog.FilePath.IsEmpty || dialog.Canceled == true || Directory.Exists(dialog.FilePath.ToString()))
+                {
+                    return;
+                }
                 Path = dialog.FilePath.ToString();
                 fileNameStatus.Title = Path;
             }
