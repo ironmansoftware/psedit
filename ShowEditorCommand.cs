@@ -148,7 +148,7 @@ namespace psedit
 
             textEditor.TextChanged += () =>
             {
-                if (!fileNameStatus.Title.EndsWith("*"))
+                if (!fileNameStatus.Title.EndsWith("*") && textEditor.modified == true)
                 {
                     fileNameStatus.Title += "*";
                     statusBar.SetNeedsDisplay();
@@ -384,8 +384,8 @@ namespace psedit
                 Path = dialog.FilePath.ToString();
                 fileNameStatus.Title = Path;
             }
-
             fileNameStatus.Title = fileNameStatus.Title.TrimEnd("*");
+            textEditor.modified = false;
             statusBar.SetNeedsDisplay();
 
             try
@@ -412,8 +412,10 @@ namespace psedit
             {
                 cursorStatus.Title = string.Empty;
             }
-
-
+            if (textEditor.modified == true && !fileNameStatus.Title.EndsWith("*") && fileNameStatus.Title != "Unsaved")
+            {
+                fileNameStatus.Title += "*";
+            }
             position.Title = $"{textEditor.CursorPosition.X},{textEditor.CursorPosition.Y}";
             statusBar.SetNeedsDisplay();
         }

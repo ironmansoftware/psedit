@@ -17,6 +17,8 @@ namespace psedit
         public ConcurrentDictionary<Point, string> ColumnErrors { get; set; } = new ConcurrentDictionary<Point, string>();
         private ParseError[] _errors;
 
+        public bool modified = false;
+
         public PowerShellEditorTextView(Runspace runspace)
         {
             Autocomplete = new PowerShellAutocomplete(runspace);
@@ -118,6 +120,10 @@ namespace psedit
 
         public override void Redraw(Rect bounds)
         {
+            if (IsDirty)
+            {
+                modified = true;
+            }
             var text = Text.ToString();
             Parser.ParseInput(text, out Token[] tokens, out ParseError[] errors);
             Errors.Clear();
