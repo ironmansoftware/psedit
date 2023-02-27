@@ -190,10 +190,14 @@ namespace psedit
                 var formatValue = textEditor.Text.ToString();
                 if (!System.String.IsNullOrEmpty(formatValue))
                 {
+                    var previousCursorPosition = textEditor.CursorPosition;
+                    var previousTopRow = textEditor.TopRow;
                     var formatted = InvokeCommand.InvokeScript("Invoke-Formatter -ScriptDefinition $args[0]", formatValue).FirstOrDefault();
                     if (formatted != null)
                     {
                         textEditor.Text = formatted.BaseObject as string;
+                        textEditor.CursorPosition = previousCursorPosition;
+                        textEditor.TopRow = previousTopRow;
                     }
                 }
             }
