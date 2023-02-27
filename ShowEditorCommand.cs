@@ -192,12 +192,18 @@ namespace psedit
                 {
                     var previousCursorPosition = textEditor.CursorPosition;
                     var previousTopRow = textEditor.TopRow;
-                    var formatted = InvokeCommand.InvokeScript("Invoke-Formatter -ScriptDefinition $args[0]", formatValue).FirstOrDefault();
-                    if (formatted != null)
+                    using (var powerShell = PowerShell.Create(RunspaceMode.CurrentRunspace))
                     {
-                        textEditor.Text = formatted.BaseObject as string;
-                        textEditor.CursorPosition = previousCursorPosition;
-                        textEditor.TopRow = previousTopRow;
+                        powerShell.AddCommand("Invoke-Formatter");
+                        powerShell.AddParameter("ScriptDefinition", formatValue);
+                        var result = powerShell.Invoke();
+                        var formatted = result.FirstOrDefault();
+                        if (formatted != null)
+                        {
+                            textEditor.Text = formatted.BaseObject as string;
+                            textEditor.CursorPosition = previousCursorPosition;
+                            textEditor.TopRow = previousTopRow;
+                        }
                     }
                 }
             }
