@@ -66,7 +66,7 @@ namespace psedit
 
             top.Add(new MenuBar(new MenuBarItem[] {
                 new MenuBarItem ("_File", new MenuItem [] {
-                        new MenuItem ("_New", "", New, shortcut: Key.CtrlMask | Key.N),
+                        new MenuItem ("_New", "", New),
                         new MenuItem ("_Open", "", () => {
                             var dialog = new OpenDialog("Open file", "Open file");
                             dialog.CanChooseDirectories = false;
