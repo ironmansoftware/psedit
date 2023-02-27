@@ -13,6 +13,8 @@ Edit PowerShell scripts directly in your terminal.
 
 ## Installation
 
+This module is available on the [PowerShell Gallery](https://www.powershellgallery.com/packages/psedit). 
+
 ```powershell
 Install-Module psedit
 ```
