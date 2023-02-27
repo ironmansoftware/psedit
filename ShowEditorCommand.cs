@@ -66,6 +66,7 @@ namespace psedit
 
             top.Add(new MenuBar(new MenuBarItem[] {
                 new MenuBarItem ("_File", new MenuItem [] {
+                        new MenuItem ("_New", "", New, shortcut: Key.CtrlMask | Key.N),
                         new MenuItem ("_Open", "", () => {
                             var dialog = new OpenDialog("Open file", "Open file");
                             dialog.CanChooseDirectories = false;
@@ -367,6 +368,13 @@ namespace psedit
             });
 
             Application.Run(dialog);
+        }
+
+        private void New()
+        {
+            fileNameStatus.Title = "Unsaved";
+            Path = null;
+            textEditor.Text = "";
         }
 
         private void Save(bool saveAs)
