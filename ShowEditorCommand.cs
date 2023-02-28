@@ -20,6 +20,7 @@ namespace psedit
         private StatusItem cursorStatus;
         private Toplevel top;
         private Runspace _runspace;
+        private string currentDirectory;
 
         [Parameter(ParameterSetName = "Path", ValueFromPipeline = true, Position = 0)]
         public string Path { get; set; }
@@ -31,6 +32,7 @@ namespace psedit
         {
             _runspace = RunspaceFactory.CreateRunspace();
             _runspace.Open();
+            currentDirectory = SessionState.Path.CurrentLocation.Path;
         }
 
         protected override void ProcessRecord()
@@ -73,7 +75,8 @@ namespace psedit
                             dialog.CanChooseFiles = true;
                             dialog.AllowsMultipleSelection = false;
                             dialog.AllowedFileTypes = new [] {".ps1"};
-
+                            dialog.DirectoryPath = currentDirectory;
+                            
                             Application.Run(dialog);
 
                             if (dialog.FilePath.IsEmpty || dialog.Canceled == true)
@@ -383,6 +386,7 @@ namespace psedit
             {
                 var dialog = new SaveDialog("Save file", "Save file");
                 dialog.AllowedFileTypes = new string[] { ".ps1" };
+                dialog.DirectoryPath = currentDirectory;
                 Application.Run(dialog);
 
                 if (dialog.FilePath.IsEmpty || dialog.Canceled == true || Directory.Exists(dialog.FilePath.ToString()))
