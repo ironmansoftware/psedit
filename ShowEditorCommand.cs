@@ -68,7 +68,7 @@ namespace psedit
                 new MenuBarItem ("_File", new MenuItem [] {
                         new MenuItem ("_New", "", New),
                         new MenuItem ("_Open", "", () => {
-                            var dialog = new OpenDialog("Open file", "Open file");
+                            var dialog = new OpenDialog("Open file", "");
                             dialog.CanChooseDirectories = false;
                             dialog.CanChooseFiles = true;
                             dialog.AllowsMultipleSelection = false;
@@ -381,7 +381,7 @@ namespace psedit
         {
             if (string.IsNullOrEmpty(Path) || saveAs)
             {
-                var dialog = new SaveDialog("Save file", "Save file");
+                var dialog = new SaveDialog(saveAs ? "Save file as" : "Save file","");
                 dialog.AllowedFileTypes = new string[] { ".ps1" };
                 Application.Run(dialog);
 
