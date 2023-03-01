@@ -118,6 +118,11 @@ namespace psedit
 
         public List<List<Rune>> Runes { get; private set; }
 
+        private void ColorNormal()
+        {
+            // this is default color / background when there is no content
+            Driver.SetAttribute(Terminal.Gui.Attribute.Make(Color.Green, Color.Black));
+        }
         public override void Redraw(Rect bounds)
         {
             if (IsDirty)
@@ -204,21 +209,7 @@ namespace psedit
                     {
                         ColumnErrors.TryAdd(new Point(idxCol, idxRow), colError.Message);
                     }
-
-                    if (idxCol < line.Count && Selecting && PointInSelection(idxCol, idxRow))
-                    {
-                        ColorSelection(line, idxCol);
-                    }
-                    else if (idxCol == CurrentColumn && idxRow == CurrentRow && !Selecting && !Used
-                      && HasFocus && idxCol < lineRuneCount)
-                    {
-                        ColorUsed(line, idxCol);
-                    }
-                    else
-                    {
-                        ColorNormal(line, idxCol);
-                    }
-
+                    
                     if (rune == '\t')
                     {
                         cols += TabWidth + 1;
