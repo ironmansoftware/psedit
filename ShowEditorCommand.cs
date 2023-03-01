@@ -6,6 +6,7 @@ using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Text;
 using Terminal.Gui;
+using System.Collections.Generic;
 
 namespace psedit
 {
@@ -70,13 +71,15 @@ namespace psedit
                 new MenuBarItem ("_File", new MenuItem [] {
                         new MenuItem ("_New", "", New),
                         new MenuItem ("_Open", "", () => {
-                            var dialog = new OpenDialog("Open file", "Open file");
+                            List<string> allowedFileTypes = new List<string>();
+                            allowedFileTypes.Add(".ps1");
+                            var dialog = new OpenDialog("Open file", "", allowedFileTypes);
+
                             dialog.CanChooseDirectories = false;
                             dialog.CanChooseFiles = true;
                             dialog.AllowsMultipleSelection = false;
-                            dialog.AllowedFileTypes = new [] {".ps1"};
                             dialog.DirectoryPath = currentDirectory;
-                            
+
                             Application.Run(dialog);
 
                             if (dialog.FilePath.IsEmpty || dialog.Canceled == true)
@@ -384,8 +387,9 @@ namespace psedit
         {
             if (string.IsNullOrEmpty(Path) || saveAs)
             {
-                var dialog = new SaveDialog("Save file", "Save file");
-                dialog.AllowedFileTypes = new string[] { ".ps1" };
+                List<string> allowedFileTypes = new List<string>();
+                allowedFileTypes.Add(".ps1");
+                var dialog = new SaveDialog(saveAs ? "Save file as" : "Save file","", allowedFileTypes);
                 dialog.DirectoryPath = currentDirectory;
                 Application.Run(dialog);
 
