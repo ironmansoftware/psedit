@@ -72,6 +72,7 @@ namespace psedit
                             List<string> allowedFileTypes = new List<string>();
                             allowedFileTypes.Add(".ps1");
                             var dialog = new OpenDialog("Open file", "", allowedFileTypes);
+
                             dialog.CanChooseDirectories = false;
                             dialog.CanChooseFiles = true;
                             dialog.AllowsMultipleSelection = false;
@@ -386,6 +387,7 @@ namespace psedit
                 List<string> allowedFileTypes = new List<string>();
                 allowedFileTypes.Add(".ps1");
                 var dialog = new SaveDialog(saveAs ? "Save file as" : "Save file","", allowedFileTypes);
+
                 Application.Run(dialog);
 
                 if (dialog.FilePath.IsEmpty || dialog.Canceled == true || Directory.Exists(dialog.FilePath.ToString()))
