@@ -132,6 +132,7 @@ namespace psedit
             var text = Text.ToString();
             Parser.ParseInput(text, out Token[] tokens, out ParseError[] errors);
             Errors.Clear();
+            ColumnErrors.Clear();
             _errors = errors;
             Runes = StringToRunes(text);
             foreach (var error in _errors) 
