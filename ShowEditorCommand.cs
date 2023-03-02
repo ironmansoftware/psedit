@@ -25,6 +25,7 @@ namespace psedit
 
         [Parameter(ParameterSetName = "Path", ValueFromPipeline = true, Position = 0)]
         public string Path { get; set; }
+		private byte [] _originalText = new System.IO.MemoryStream().ToArray();
 
         [Parameter()]
         public SwitchParameter DisableFormatOnSave { get; set; }
@@ -54,8 +55,7 @@ namespace psedit
             if (Path != null)
             {
                 Path = GetUnresolvedProviderPathFromPSPath(Path);
-                textEditor.Text = File.ReadAllText(Path);
-                fileNameStatus.Title = System.IO.Path.GetFileName(Path);
+                LoadFile();
             }
 
             Application.Init();
@@ -71,6 +71,10 @@ namespace psedit
                 new MenuBarItem ("_File", new MenuItem [] {
                         new MenuItem ("_New", "", New),
                         new MenuItem ("_Open", "", () => {
+                            if (!CanCloseFile()) 
+                            {
+                                return;
+                            }
                             List<string> allowedFileTypes = new List<string>();
                             allowedFileTypes.Add(".ps1");
                             var dialog = new OpenDialog("Open file", "", allowedFileTypes);
@@ -95,8 +99,7 @@ namespace psedit
                             try
                             {
                                 Path = dialog.FilePath.ToString();
-                                textEditor.Text = File.ReadAllText(Path);
-                                fileNameStatus.Title = Path;
+                                LoadFile();
                             }
                             catch (Exception ex)
                             {
@@ -112,6 +115,10 @@ namespace psedit
                         new MenuItem ("_Quit", "", () => {
                             try
                             {
+                                if (!CanCloseFile ()) 
+                                {
+                                    return;
+                                }
                                 Application.RequestStop();
                             }
                             catch {}
@@ -218,6 +225,36 @@ namespace psedit
             {
                 MessageBox.ErrorQuery("Formatting Failed", ex.Message);
             }
+        }
+		private bool CanCloseFile()
+		{
+			if (textEditor.Text == _originalText) 
+            {
+				return true;
+			}
+
+			var r = MessageBox.ErrorQuery("Save File",
+				$"Do you want save changes in {fileNameStatus.Title}?", "Yes", "No", "Cancel");
+			if (r == 0) 
+            {
+				return Save(false);
+			} 
+            else if (r == 1) 
+            {
+				return true;
+			}
+
+			return false;
+		}
+
+        private void LoadFile()
+        {
+            if (Path != null) 
+            {
+				textEditor.LoadFile(Path);
+				_originalText = textEditor.Text.ToByteArray();
+                fileNameStatus.Title = System.IO.Path.GetFileName(Path);
+			}
         }
 
         private void ExitAndRun()
@@ -378,12 +415,17 @@ namespace psedit
 
         private void New()
         {
+            if (!CanCloseFile ()) 
+            {
+                return;
+            }
             fileNameStatus.Title = "Unsaved";
             Path = null;
-            textEditor.Text = "";
+			_originalText = new System.IO.MemoryStream().ToArray();
+			textEditor.Text = _originalText;
         }
 
-        private void Save(bool saveAs)
+        private bool Save(bool saveAs)
         {
             if (string.IsNullOrEmpty(Path) || saveAs)
             {
@@ -395,10 +437,10 @@ namespace psedit
 
                 if (dialog.FilePath.IsEmpty || dialog.Canceled == true || Directory.Exists(dialog.FilePath.ToString()))
                 {
-                    return;
+                    return false;
                 }
                 Path = dialog.FilePath.ToString();
-                fileNameStatus.Title = Path;
+                fileNameStatus.Title = dialog.FileName;
             }
             fileNameStatus.Title = fileNameStatus.Title.TrimEnd("*");
             textEditor.modified = false;
@@ -411,11 +453,14 @@ namespace psedit
                     Format();
                 }
                 File.WriteAllText(Path, textEditor.Text.ToString());
+                _originalText = textEditor.Text.ToByteArray();
+                return true;
             }
             catch (Exception ex)
             {
                 MessageBox.ErrorQuery("Failed", "Failed to save. " + ex.Message, "Ok");
             }
+            return false;
         }
 
         private void UpdatePosition()
