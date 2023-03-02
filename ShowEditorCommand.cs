@@ -62,7 +62,7 @@ namespace psedit
             top = Application.Top;
 
             var versionStatus = new StatusItem(Key.Unknown, base.MyInvocation.MyCommand.Module.Version.ToString(), () => { });
-            position = new StatusItem(Key.Unknown, "0,0", () => { });
+            position = new StatusItem(Key.Unknown, "", () => { });
             cursorStatus = new StatusItem(Key.Unknown, "", () => { });
 
             statusBar = new StatusBar(new StatusItem[] { fileNameStatus, versionStatus, position, cursorStatus });
@@ -477,7 +477,7 @@ namespace psedit
             {
                 fileNameStatus.Title += "*";
             }
-            position.Title = $"{textEditor.CursorPosition.X},{textEditor.CursorPosition.Y}";
+            position.Title = $"Ln {textEditor.CursorPosition.Y + 1}, Col {textEditor.CursorPosition.X + 1}";
             statusBar.SetNeedsDisplay();
         }
 
