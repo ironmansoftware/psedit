@@ -40,7 +40,7 @@ namespace psedit
         protected override void ProcessRecord()
         {
             textEditor = new PowerShellEditorTextView(_runspace);
-            textEditor.KeyPress += (k) =>
+            textEditor.UnwrappedCursorPosition += (k) =>
             {
                 UpdatePosition();
             };
