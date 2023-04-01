@@ -70,42 +70,7 @@ namespace psedit
             top.Add(new MenuBar(new MenuBarItem[] {
                 new MenuBarItem ("_File", new MenuItem [] {
                         new MenuItem ("_New", "", New),
-                        new MenuItem ("_Open", "", () => {
-                            if (!CanCloseFile()) 
-                            {
-                                return;
-                            }
-                            List<string> allowedFileTypes = new List<string>();
-                            allowedFileTypes.Add(".ps1");
-                            var dialog = new OpenDialog("Open file", "", allowedFileTypes);
-
-                            dialog.CanChooseDirectories = false;
-                            dialog.CanChooseFiles = true;
-                            dialog.AllowsMultipleSelection = false;
-                            dialog.DirectoryPath = currentDirectory;
-
-                            Application.Run(dialog);
-
-                            if (dialog.FilePath.IsEmpty || dialog.Canceled == true)
-                            {
-                                return;
-                            }
-
-                            if (!System.IO.Path.HasExtension(dialog.FilePath.ToString()) || !System.IO.Path.GetExtension(dialog.FilePath.ToString()).Equals(".ps1", StringComparison.CurrentCultureIgnoreCase))
-                            {
-                                return;
-                            }
-
-                            try
-                            {
-                                Path = dialog.FilePath.ToString();
-                                LoadFile();
-                            }
-                            catch (Exception ex)
-                            {
-                                MessageBox.ErrorQuery("Failed", "Failed to load Window: " + ex.Message, "Ok");
-                            }
-                        }, shortcut: Key.CtrlMask | Key.O),
+                        new MenuItem ("_Open", "", Open, shortcut: Key.CtrlMask | Key.O),
                         new MenuItem ("_Save", "", () => {
                             Save(false);
                         }, shortcut: Key.CtrlMask | Key.S),
@@ -115,7 +80,7 @@ namespace psedit
                         new MenuItem ("_Quit", "", () => {
                             try
                             {
-                                if (!CanCloseFile ()) 
+                                if (!CanCloseFile ())
                                 {
                                     return;
                                 }
@@ -226,33 +191,71 @@ namespace psedit
                 MessageBox.ErrorQuery("Formatting Failed", ex.Message);
             }
         }
-		private bool CanCloseFile()
-		{
-			if (textEditor.Text == _originalText) 
+        private bool CanCloseFile()
+        {
+            if (textEditor.Text == _originalText)
             {
-				return true;
-			}
+                return true;
+            }
 
-			var r = MessageBox.ErrorQuery("Save File",
+            var r = MessageBox.ErrorQuery("Save File",
 				$"Do you want save changes in {fileNameStatus.Title}?", "Yes", "No", "Cancel");
 			if (r == 0) 
             {
-				return Save(false);
-			} 
-            else if (r == 1) 
+                return Save(false);
+            }
+            else if (r == 1)
             {
-				return true;
-			}
+                return true;
+            }
 
-			return false;
-		}
+            return false;
+        }
+
+        private void Open()
+        {
+            if (!CanCloseFile())
+            {
+                return;
+            }
+            List<string> allowedFileTypes = new List<string>();
+            allowedFileTypes.Add(".ps1");
+            var dialog = new OpenDialog("Open file", "", allowedFileTypes);
+
+            dialog.CanChooseDirectories = false;
+            dialog.CanChooseFiles = true;
+            dialog.AllowsMultipleSelection = false;
+            dialog.DirectoryPath = currentDirectory;
+
+            Application.Run(dialog);
+
+            if (dialog.FilePath.IsEmpty || dialog.Canceled == true)
+            {
+                return;
+            }
+
+            if (!System.IO.Path.HasExtension(dialog.FilePath.ToString()) || !System.IO.Path.GetExtension(dialog.FilePath.ToString()).Equals(".ps1", StringComparison.CurrentCultureIgnoreCase))
+            {
+                return;
+            }
+
+            try
+            {
+                Path = dialog.FilePath.ToString();
+                LoadFile();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.ErrorQuery("Failed", "Failed to load Window: " + ex.Message, "Ok");
+            }
+        }
 
         private void LoadFile()
         {
-            if (Path != null) 
+            if (Path != null)
             {
-				textEditor.LoadFile(Path);
-				_originalText = textEditor.Text.ToByteArray();
+                textEditor.LoadFile(Path);
+                _originalText = textEditor.Text.ToByteArray();
                 fileNameStatus.Title = System.IO.Path.GetFileName(Path);
 			}
         }
@@ -421,8 +424,8 @@ namespace psedit
             }
             fileNameStatus.Title = "Unsaved";
             Path = null;
-			_originalText = new System.IO.MemoryStream().ToArray();
-			textEditor.Text = _originalText;
+            _originalText = new System.IO.MemoryStream().ToArray();
+            textEditor.Text = _originalText;
         }
 
         private bool Save(bool saveAs)
