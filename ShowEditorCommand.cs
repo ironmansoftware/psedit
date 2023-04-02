@@ -77,17 +77,7 @@ namespace psedit
                         new MenuItem ("Save As", "", () => {
                             Save(true);
                         }),
-                        new MenuItem ("_Quit", "", () => {
-                            try
-                            {
-                                if (!CanCloseFile ())
-                                {
-                                    return;
-                                }
-                                Application.RequestStop();
-                            }
-                            catch {}
-                        }, shortcut: Key.CtrlMask | Key.Q)
+                        new MenuItem ("_Quit", "", Quit, shortcut: Key.CtrlMask | Key.Q)
                     }),
                     new MenuBarItem("_Edit", new []
                     {
@@ -248,6 +238,19 @@ namespace psedit
             {
                 MessageBox.ErrorQuery("Failed", "Failed to load Window: " + ex.Message, "Ok");
             }
+        }
+
+        private void Quit()
+        {
+            try
+            {
+                if (!CanCloseFile())
+                {
+                    return;
+                }
+                Application.RequestStop();
+            }
+            catch {}
         }
 
         private void LoadFile()
