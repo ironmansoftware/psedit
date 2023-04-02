@@ -23,6 +23,15 @@ namespace psedit
         private Runspace _runspace;
         private string currentDirectory;
 
+        #region Find and replace variables
+		private Window _winDialog;
+		private TabView _tabView;
+        private string _textToFind;
+		private string _textToReplace;
+		private bool _matchCase;
+		private bool _matchWholeWord;
+        #endregion
+
         [Parameter(ParameterSetName = "Path", ValueFromPipeline = true, Position = 0)]
         public string Path { get; set; }
 		private byte [] _originalText = new System.IO.MemoryStream().ToArray();
@@ -81,6 +90,9 @@ namespace psedit
                     }),
                     new MenuBarItem("_Edit", new []
                     {
+                        new MenuItem ("_Find", "", () => Find(), shortcut: Key.CtrlMask | Key.F),
+                        new MenuItem ("_Replace", "", () => Replace(), shortcut: Key.CtrlMask | Key.H),
+                        null,
                         new MenuItem ("_Select All", "", () => SelectAll(), shortcut: Key.CtrlMask | Key.T),
                         null,
                         new MenuItem("Format", "", Format, CanFormat, shortcut: Key.CtrlMask | Key.ShiftMask | Key.R),
@@ -111,6 +123,17 @@ namespace psedit
                     })
                 }));
 
+			top.KeyPress += (e) => {
+				var keys = ShortcutHelper.GetModifiersKey(e.KeyEvent);
+				if (_winDialog != null && (e.KeyEvent.Key == Key.Esc)) {
+					DisposeWinDialog();
+				}
+                else if (_winDialog == null && (e.KeyEvent.Key == (Key.F | Key.CtrlMask)))
+                {
+                    Find();
+                }
+			};
+            
             textEditor.X = 0;
             textEditor.Y = 1;
             textEditor.Height = Dim.Fill() - 1;
@@ -475,6 +498,369 @@ namespace psedit
 		{
 			textEditor.SelectAll();
 		}
+
+        #region Find and Replaces methods
+		private void Replace()
+		{
+			CreateFindReplace(false);
+		}
+
+		private void ReplaceNext()
+		{
+			ContinueFind(true, true);
+		}
+
+		private void ReplacePrevious()
+		{
+			ContinueFind(false, true);
+		}
+		private void ReplaceAll()
+		{
+			if (string.IsNullOrEmpty(_textToFind) || (string.IsNullOrEmpty(_textToReplace) && _winDialog == null)) 
+            {
+				Replace();
+				return;
+			}
+
+			if (textEditor.ReplaceAllText(_textToFind, _matchCase, _matchWholeWord, _textToReplace)) 
+            {
+				MessageBox.Query("Replace All", $"All occurrences of: '{_textToFind}' were replaced with: '{_textToReplace}'", "Ok");
+			} 
+            else 
+            {
+				MessageBox.Query("Replace All", $"Found no occurrences of text: '{_textToFind}'", "Ok");
+			}
+		}
+		private void SetFindText()
+		{
+			_textToFind = !textEditor.SelectedText.IsEmpty
+				? textEditor.SelectedText.ToString()
+				: string.IsNullOrEmpty(_textToFind) ? "" : _textToFind;
+
+			_textToReplace = string.IsNullOrEmpty(_textToReplace) ? "" : _textToReplace;
+		}
+		private View ReplaceTab()
+		{
+			var d = new View();
+			d.DrawContent += (e) => {
+				foreach (var v in d.Subviews) {
+					v.SetNeedsDisplay();
+				}
+			};
+
+			var lblWidth = "Replace:".Length;
+
+			var label = new Label("Find:") {
+				Y = 1,
+				Width = lblWidth,
+				TextAlignment = TextAlignment.Right,
+				AutoSize = false
+			};
+			d.Add(label);
+
+			SetFindText();
+			var txtToFind = new TextField(_textToFind) {
+				X = Pos.Right (label) + 1,
+				Y = Pos.Top (label),
+				Width = 20
+			};
+			txtToFind.Enter += (_) => txtToFind.Text = _textToFind;
+			d.Add(txtToFind);
+
+			var btnFindNext = new Button("Replace _Next") {
+				X = Pos.Right (txtToFind) + 1,
+				Y = Pos.Top (label),
+				Width = 20,
+				Enabled = !txtToFind.Text.IsEmpty,
+				TextAlignment = TextAlignment.Centered,
+				IsDefault = true,
+				AutoSize = false
+			};
+			btnFindNext.Clicked += () => ReplaceNext();
+			d.Add(btnFindNext);
+
+			label = new Label("Replace:") {
+				X = Pos.Left (label),
+				Y = Pos.Top (label) + 1,
+				Width = lblWidth,
+				TextAlignment = TextAlignment.Right
+			};
+			d.Add(label);
+
+			SetFindText();
+			var txtToReplace = new TextField(_textToReplace) {
+				X = Pos.Right (label) + 1,
+				Y = Pos.Top (label),
+				Width = 20
+			};
+			txtToReplace.TextChanged += (e) => _textToReplace = txtToReplace.Text.ToString();
+			d.Add(txtToReplace);
+
+			var btnFindPrevious = new Button("Replace _Previous") {
+				X = Pos.Right(txtToFind) + 1,
+				Y = Pos.Top(btnFindNext) + 1,
+				Width = 20,
+				Enabled = !txtToFind.Text.IsEmpty,
+				TextAlignment = TextAlignment.Centered,
+				AutoSize = false
+			};
+			btnFindPrevious.Clicked += () => ReplacePrevious();
+			d.Add(btnFindPrevious);
+
+			var btnReplaceAll = new Button("Replace _All") {
+				X = Pos.Right(txtToFind) + 1,
+				Y = Pos.Top(btnFindPrevious) + 1,
+				Width = 20,
+				Enabled = !txtToFind.Text.IsEmpty,
+				TextAlignment = TextAlignment.Centered,
+				AutoSize = false
+			};
+			btnReplaceAll.Clicked += () => ReplaceAll();
+			d.Add(btnReplaceAll);
+
+			txtToFind.TextChanged += (e) => {
+				_textToFind = txtToFind.Text.ToString();
+				textEditor.FindTextChanged();
+				btnFindNext.Enabled = !txtToFind.Text.IsEmpty;
+				btnFindPrevious.Enabled = !txtToFind.Text.IsEmpty;
+				btnReplaceAll.Enabled = !txtToFind.Text.IsEmpty;
+			};
+
+			var btnCancel = new Button("Cancel") {
+				X = Pos.Right(txtToFind) + 1,
+				Y = Pos.Top(btnReplaceAll) + 1,
+				Width = 20,
+				TextAlignment = TextAlignment.Centered,
+				AutoSize = false
+			};
+			btnCancel.Clicked += () => {
+				DisposeWinDialog();
+			};
+			d.Add(btnCancel);
+
+			var ckbMatchCase = new CheckBox("Match c_ase") {
+				X = 0,
+				Y = Pos.Top(txtToFind) + 2,
+				Checked = _matchCase
+			};
+			ckbMatchCase.Toggled += (e) => _matchCase = ckbMatchCase.Checked;
+			d.Add(ckbMatchCase);
+
+			var ckbMatchWholeWord = new CheckBox("Match _whole word") {
+				X = 0,
+				Y = Pos.Top(ckbMatchCase) + 1,
+				Checked = _matchWholeWord
+			};
+			ckbMatchWholeWord.Toggled += (e) => _matchWholeWord = ckbMatchWholeWord.Checked;
+			d.Add(ckbMatchWholeWord);
+
+			d.Width = lblWidth + txtToFind.Width + btnFindNext.Width + 2;
+			d.Height = btnFindNext.Height + btnFindPrevious.Height + btnCancel.Height + 4;
+
+			return d;
+		}
+
+		private void Find()
+		{
+			CreateFindReplace();
+		}
+		private void FindNext()
+		{
+			ContinueFind();
+		}
+
+		private void ContinueFind(bool next = true, bool replace = false)
+		{
+			if (!replace && string.IsNullOrEmpty(_textToFind)) {
+				Find();
+				return;
+			} else if (replace && (string.IsNullOrEmpty(_textToFind)
+				|| (_winDialog == null && string.IsNullOrEmpty(_textToReplace)))) {
+				Replace();
+				return;
+			}
+
+			bool found;
+			bool gaveFullTurn;
+
+			if (next) 
+            {
+				if (!replace) 
+                {
+					found = textEditor.FindNextText(_textToFind, out gaveFullTurn, _matchCase, _matchWholeWord);
+				} 
+                else 
+                {
+					found = textEditor.FindNextText(_textToFind, out gaveFullTurn, _matchCase, _matchWholeWord, _textToReplace, true);
+				}
+			}
+            else 
+            {
+				if (!replace) 
+                {
+					found = textEditor.FindPreviousText(_textToFind, out gaveFullTurn, _matchCase, _matchWholeWord);
+				} 
+                else 
+                {
+					found = textEditor.FindPreviousText(_textToFind, out gaveFullTurn, _matchCase, _matchWholeWord, _textToReplace, true);
+				}
+			}
+			if (!found) 
+            {
+				MessageBox.Query("Find", $"The following text was not found: '{_textToFind}'", "Ok");
+			}
+            else if (gaveFullTurn) 
+            {
+				MessageBox.Query("Find", $"No more occurrences were found for the following text: '{_textToFind}'", "Ok");
+			}
+		}
+
+		private void FindPrevious()
+		{
+			ContinueFind(false);
+		}
+		private void CreateFindReplace(bool isFind = true)
+		{
+			if (_winDialog != null) {
+				_winDialog.SetFocus();
+				return;
+			}
+
+			_winDialog = new Window(isFind ? "Find" : "Replace") {
+				X = textEditor.Bounds.Width / 2 - 30,
+				Y = textEditor.Bounds.Height / 2 - 10,
+                ColorScheme = Colors.Dialog
+			};
+
+			_tabView = new TabView() {
+				X = 0,
+				Y = 0,
+				Width = Dim.Fill(),
+				Height = Dim.Fill()
+			};
+            if (isFind) 
+            {
+                var find = FindTab();
+			    _tabView.AddTab(new TabView.Tab ("Find", FindTab()), isFind);
+                _winDialog.Width = find.Width + 4;
+                _winDialog.Height = find.Height + 4;
+            }
+            else 
+            {
+                var replace = ReplaceTab();
+                _tabView.AddTab(new TabView.Tab ("Replace", replace), !isFind);
+                _winDialog.Width = replace.Width + 4;
+                _winDialog.Height = replace.Height + 4;
+            }
+
+			_tabView.SelectedTabChanged += (s, e) => _tabView.SelectedTab.View.FocusFirst();
+			_winDialog.Add(_tabView);
+
+			top.Add(_winDialog);
+
+			_winDialog.SuperView.BringSubviewToFront(_winDialog);
+			_winDialog.SetFocus();
+		}
+		private View FindTab()
+		{
+			var d = new View();
+			d.DrawContent += (e) => {
+				foreach (var v in d.Subviews) {
+					v.SetNeedsDisplay();
+				}
+			};
+
+			var lblWidth = "Replace:".Length;
+
+			var label = new Label("Find:") {
+				Y = 1,
+				Width = lblWidth,
+				TextAlignment = TextAlignment.Right,
+				AutoSize = false
+			};
+			d.Add(label);
+
+			SetFindText();
+			var txtToFind = new TextField(_textToFind) {
+				X = Pos.Right (label) + 1,
+				Y = Pos.Top (label),
+				Width = 20
+			};
+			txtToFind.Enter += (_) => txtToFind.Text = _textToFind;
+			d.Add(txtToFind);
+
+			var btnFindNext = new Button("Find _Next") {
+				X = Pos.Right (txtToFind) + 1,
+				Y = Pos.Top (label),
+				Width = 20,
+				Enabled = !txtToFind.Text.IsEmpty,
+				TextAlignment = TextAlignment.Centered,
+				IsDefault = true,
+				AutoSize = false
+			};
+			btnFindNext.Clicked += () => FindNext();
+			d.Add(btnFindNext);
+
+			var btnFindPrevious = new Button("Find _Previous") {
+				X = Pos.Right (txtToFind) + 1,
+				Y = Pos.Top (btnFindNext) + 1,
+				Width = 20,
+				Enabled = !txtToFind.Text.IsEmpty,
+				TextAlignment = TextAlignment.Centered,
+				AutoSize = false
+			};
+			btnFindPrevious.Clicked += () => FindPrevious();
+			d.Add(btnFindPrevious);
+
+			txtToFind.TextChanged += (e) => {
+				_textToFind = txtToFind.Text.ToString();
+				textEditor.FindTextChanged();
+				btnFindNext.Enabled = !txtToFind.Text.IsEmpty;
+				btnFindPrevious.Enabled = !txtToFind.Text.IsEmpty;
+			};
+
+			var btnCancel = new Button("Cancel") {
+				X = Pos.Right(txtToFind) + 1,
+				Y = Pos.Top(btnFindPrevious) + 2,
+				Width = 20,
+				TextAlignment = TextAlignment.Centered,
+				AutoSize = false
+			};
+			btnCancel.Clicked += () => {
+				DisposeWinDialog();
+			};
+			d.Add(btnCancel);
+
+			var ckbMatchCase = new CheckBox("Match c_ase") {
+				X = 0,
+				Y = Pos.Top (txtToFind) + 2,
+				Checked = _matchCase
+			};
+			ckbMatchCase.Toggled += (e) => _matchCase = ckbMatchCase.Checked;
+			d.Add(ckbMatchCase);
+
+			var ckbMatchWholeWord = new CheckBox("Match _whole word") {
+				X = 0,
+				Y = Pos.Top(ckbMatchCase) + 1,
+				Checked = _matchWholeWord
+			};
+			ckbMatchWholeWord.Toggled += (e) => _matchWholeWord = ckbMatchWholeWord.Checked;
+			d.Add(ckbMatchWholeWord);
+
+			d.Width = label.Width + txtToFind.Width + btnFindNext.Width + 2;
+			d.Height = btnFindNext.Height + btnFindPrevious.Height + btnCancel.Height + 4;
+
+			return d;
+		}
+
+
+		private void DisposeWinDialog()
+		{
+			_winDialog.Dispose();
+			top.Remove(_winDialog);
+			_winDialog = null;
+		}
+        #endregion
         private void UpdatePosition()
         {
             if (textEditor.ColumnErrors.ContainsKey(textEditor.CursorPosition))
