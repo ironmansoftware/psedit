@@ -81,6 +81,8 @@ namespace psedit
                     }),
                     new MenuBarItem("_Edit", new []
                     {
+                        new MenuItem ("_Select All", "", () => SelectAll(), shortcut: Key.CtrlMask | Key.T),
+                        null,
                         new MenuItem("Format", "", Format, CanFormat, shortcut: Key.CtrlMask | Key.ShiftMask | Key.R),
                         //new MenuItem("Autocomplete", "", Autocomplete, shortcut: Key.CtrlMask | Key.Space),
                     }),
@@ -469,6 +471,10 @@ namespace psedit
             return false;
         }
 
+		private void SelectAll()
+		{
+			textEditor.SelectAll();
+		}
         private void UpdatePosition()
         {
             if (textEditor.ColumnErrors.ContainsKey(textEditor.CursorPosition))
