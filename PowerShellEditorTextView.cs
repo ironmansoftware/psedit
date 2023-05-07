@@ -218,12 +218,12 @@ namespace psedit
                         {
                             cols = right - col;
                         }
-                        for (int i = 1; i < cols; i++)
+                        for (int i = 0; i < cols; i++)
                         {
                             if (col + i < right)
                             {
                                 ColorToken(colToken, colError, row, col, Selecting && PointInSelection(idxCol, idxRow));
-                                AddRune(col, row, ' ');
+                                AddRune(col + i, row, ' ');
                             }
                         }
                         tokenCol++;
