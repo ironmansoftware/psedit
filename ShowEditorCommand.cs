@@ -293,7 +293,7 @@ namespace psedit
 
             try
             {
-                Application.Shutdown();
+                Application.RequestStop();
             }
             catch { }
 
