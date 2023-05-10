@@ -1,27 +1,31 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
-using System.Management.Automation;
-using System.Management.Automation.Language;
-using System.Management.Automation.Runspaces;
-using System.Text;
 using Terminal.Gui;
 
 namespace psedit
 {
     internal class SyntaxErrorDialog
     {
-        public static void Show(ParseError[] errors)
+        public static void Show(ConcurrentDictionary<Point, string> errors)
         {
             var dataTable = new DataTable();
             dataTable.Columns.Add("Line");
             dataTable.Columns.Add("Column");
             dataTable.Columns.Add("Message");
+            
+            // sort errors by line / column
+            List<Point> sortedList = new List<Point>(errors.Keys);
+            sortedList.Sort((x,y) => {
+                var ret = x.Y.CompareTo(y.Y);
+                if (ret == 0) ret = x.X.CompareTo(y.X);
+                return ret;
+            });
 
-            foreach (var error in errors)
+            foreach (var error in sortedList)
             {
-                dataTable.Rows.Add(error.Extent.StartLineNumber, error.Extent.StartColumnNumber, error.Message);
-
+                dataTable.Rows.Add(error.Y, error.X, errors[error]);
             }
 
             var tableView = new TableView(dataTable);

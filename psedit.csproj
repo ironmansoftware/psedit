@@ -7,6 +7,7 @@
   <ItemGroup>
       <PackageReference Include="PowerShellStandard.Library" Version="5.1.1" />
       <PackageReference Include="Terminal.Gui" Version="1.9.0" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
