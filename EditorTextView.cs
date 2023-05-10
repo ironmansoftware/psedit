@@ -37,6 +37,10 @@ namespace psedit
                 Autocomplete.HostControl = this;
                 Autocomplete.SelectionKey = Key.Tab;
             }
+            else if (language == LanguageEnum.JSON)
+            {
+                editorContext = new JSONEditorContext(TabWidth);
+            }
             else 
             {
                 editorContext = null;

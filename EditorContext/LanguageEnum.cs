@@ -3,6 +3,7 @@ namespace psedit
     public enum LanguageEnum
     {
         Text,
-        Powershell
+        Powershell,
+        JSON
     }
 }

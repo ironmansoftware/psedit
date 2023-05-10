@@ -170,6 +170,9 @@ namespace psedit
                 case ".ps1": case ".psm1": case ".psd1":
                     textEditor.SetLanguage(LanguageEnum.Powershell);
                     break;
+                case ".json":
+                    textEditor.SetLanguage(LanguageEnum.JSON);
+                    break;
                 case ".txt":
                     textEditor.SetLanguage(LanguageEnum.Text);
                     break;
@@ -243,6 +246,7 @@ namespace psedit
             allowedFileTypes.Add(".ps1");
             allowedFileTypes.Add(".psm1");
             allowedFileTypes.Add(".psd1");
+            allowedFileTypes.Add(".json");
             allowedFileTypes.Add(".txt");
             var dialog = new OpenDialog("Open file", "", allowedFileTypes);
             dialog.CanChooseDirectories = false;
@@ -399,6 +403,7 @@ namespace psedit
                 allowedFileTypes.Add(".ps1");
                 allowedFileTypes.Add(".psm1");
                 allowedFileTypes.Add(".psd1");
+                allowedFileTypes.Add(".json");
                 allowedFileTypes.Add(".txt");
                 var dialog = new SaveDialog(saveAs ? "Save file as" : "Save file", "", allowedFileTypes);
                 dialog.DirectoryPath = currentDirectory;
