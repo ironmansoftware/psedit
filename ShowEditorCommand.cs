@@ -393,6 +393,7 @@ namespace psedit
             Path = null;
             _originalText = new System.IO.MemoryStream().ToArray();
             textEditor.Text = _originalText;
+            textEditor.SetLanguage(LanguageEnum.Powershell);
         }
 
         private bool Save(bool saveAs)
