@@ -134,7 +134,7 @@ namespace psedit
             Errors.Clear();
             ColumnErrors.Clear();
             _errors = errors;
-            Runes = StringToRunes(text);
+            Runes = EditorExtensions.StringToRunes(text);
             foreach (var error in _errors) 
             {
                 // Verify if error has already been reported
@@ -161,7 +161,7 @@ namespace psedit
                 {
                     break;
                 }
-                var line = GetLine(Runes, idxRow);
+                var line = EditorExtensions.GetLine(Runes, idxRow);
                 int lineRuneCount = line.Count;
                 var col = 0;
 
@@ -234,7 +234,7 @@ namespace psedit
                         AddRune(col, row, rune);
                         tokenCol++;
                     }
-                    if (!SetCol(ref col, bounds.Right, cols))
+                    if (!EditorExtensions.SetCol(ref col, bounds.Right, cols))
                     {
                         break;
                     }
@@ -271,26 +271,6 @@ namespace psedit
                     : 0);
 
             Autocomplete.RenderOverlay(renderAt);
-        }
-
-        public List<Rune> GetLine(List<List<Rune>> lines, int line)
-        {
-            if (lines.Count > 0)
-            {
-                if (line < lines.Count)
-                {
-                    return lines[line];
-                }
-                else
-                {
-                    return lines[lines.Count - 1];
-                }
-            }
-            else
-            {
-                lines.Add(new List<Rune>());
-                return lines[0];
-            }
         }
 
         void ClearRegion(int left, int top, int right, int bottom)
@@ -341,57 +321,6 @@ namespace psedit
             }
             return (w, h);
         }
-
-        internal static bool SetCol(ref int col, int width, int cols)
-        {
-            if (col + cols <= width)
-            {
-                col += cols;
-                return true;
-            }
-
-            return false;
-        }
-
-        public static List<List<Rune>> StringToRunes(ustring content)
-        {
-            var lines = new List<List<Rune>>();
-            int start = 0, i = 0;
-            var hasCR = false;
-            // ASCII code 13 = Carriage Return.
-            // ASCII code 10 = Line Feed.
-            for (; i < content.Length; i++)
-            {
-                if (content[i] == 13)
-                {
-                    hasCR = true;
-                    continue;
-                }
-                if (content[i] == 10)
-                {
-                    if (i - start > 0)
-                        lines.Add(ToRunes(content[start, hasCR ? i - 1 : i]));
-                    else
-                        lines.Add(ToRunes(ustring.Empty));
-                    start = i + 1;
-                    hasCR = false;
-                }
-            }
-            if (i - start >= 0)
-                lines.Add(ToRunes(content[start, null]));
-            return lines;
-        }
-
-        internal static List<Rune> ToRunes(ustring str)
-        {
-            List<Rune> runes = new List<Rune>();
-            foreach (var x in str.ToRunes())
-            {
-                runes.Add(x);
-            }
-            return runes;
-        }
-
     }
 
 
