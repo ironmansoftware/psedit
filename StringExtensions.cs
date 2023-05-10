@@ -17,5 +17,15 @@ namespace psedit
         {
             return AnsiRegex.Replace(output, string.Empty);
         }
+        public static string ParseNewtonsoftErrorMessage(string message)
+        {
+            var pattern = $"(.*)Path(.*)"; 
+            var matches = Regex.Matches(message, pattern);
+            if (matches[0].Groups[1].Value != null)
+            {
+                return matches[0].Groups[1].Value;
+            }
+            return message;
+        }
     }
 }
