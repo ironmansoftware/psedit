@@ -197,8 +197,11 @@ namespace psedit
                         textEditor.Format();
                         if (textEditor.Text != _originalText)
                         {
-                            fileNameStatus.Title += "*";
-                            textEditor.modified = true;
+                            if (!fileNameStatus.Title.EndsWith("*"))
+                            {
+                                fileNameStatus.Title += "*";
+                                textEditor.modified = true;
+                            }
                         }
                         else 
                         {
@@ -298,6 +301,7 @@ namespace psedit
                 textEditor.modified = false;
                 _originalText = textEditor.Text.ToByteArray();
                 _fileName = System.IO.Path.GetFileName(Path);
+                currentDirectory = System.IO.Path.GetDirectoryName(Path);
                 fileNameStatus.Title = _fileName;
                 SetLanguage(Path);
                 if (statusBar != null)
@@ -390,6 +394,7 @@ namespace psedit
                 return;
             }
             fileNameStatus.Title = "Unsaved";
+            _fileName = "Unsaved";
             Path = null;
             _originalText = new System.IO.MemoryStream().ToArray();
             textEditor.Text = _originalText;
