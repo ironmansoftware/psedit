@@ -275,7 +275,7 @@ namespace psedit
 
                     if (colError != null)
                     {
-                        ColumnErrors.TryAdd(new Point(col, row), colError.ErrorMessage);
+                        ColumnErrors.TryAdd(new Point(idxCol, row), colError.ErrorMessage);
                     }
 
                     if (rune == '\t')
