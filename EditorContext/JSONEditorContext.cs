@@ -196,7 +196,7 @@ namespace psedit
 
                     if (colError != null)
                     {
-                        ColumnErrors.TryAdd(new Point(idxCol, row), colError.ErrorMessage);
+                        ColumnErrors.TryAdd(new Point(idxCol, idxRow), colError.ErrorMessage);
                     }
 
                     var jsonParseMatch = tokens[new Point(tokenCol, idxRow + 1)];

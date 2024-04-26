@@ -146,15 +146,16 @@ namespace psedit
                     if (editorContext != null)
                     {
                         var point = new Point(idxCol, row);
+                        var errorPoint = new Point(idxCol, idxRow);
                         var color = editorContext.GetColorByPoint(point);
 
                         if (Selecting && PointInSelection(idxCol, idxRow))
                         {
                             Driver.SetAttribute(Terminal.Gui.Attribute.Make(color, Color.Blue));
                         }
-                        else if (ColumnErrors.ContainsKey(point))
+                        else if (ColumnErrors.ContainsKey(errorPoint))
                         {
-                             Driver.SetAttribute(Terminal.Gui.Attribute.Make(color, Color.Red));
+                            Driver.SetAttribute(Terminal.Gui.Attribute.Make(color, Color.Red));
                         }
                         else 
                         {
