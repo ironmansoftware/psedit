@@ -17,6 +17,7 @@ namespace psedit
         private EditorContext editorContext;
         public bool CanFormat = false;
         public bool CanRun = false;
+        public bool CanSyntaxHighlight = false;
         public LanguageEnum _language = LanguageEnum.Powershell;
         public EditorTextView(Runspace runspace)
         {
@@ -51,11 +52,13 @@ namespace psedit
             {
                 CanFormat = editorContext.CanFormat;
                 CanRun = editorContext.CanRun;
+                CanSyntaxHighlight = editorContext.CanSyntaxHighlight;
             }
             else 
             {
                 CanFormat = false;
                 CanRun = false;
+                CanSyntaxHighlight = false;
             }
         }
         public void Format()

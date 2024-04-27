@@ -14,6 +14,7 @@ namespace psedit
         public bool CanFormat = false;
         public bool CanAutocomplete = false;
         public bool CanRun = false;
+        public bool CanSyntaxHighlight = false;
         public ConcurrentDictionary<Point, string> Errors = new ConcurrentDictionary<Point, string>();
         public ConcurrentDictionary<Point, string> ColumnErrors = new ConcurrentDictionary<Point, string>();
         public Dictionary<Point, Terminal.Gui.Color> pointColorDict = new Dictionary<Point, Terminal.Gui.Color>();

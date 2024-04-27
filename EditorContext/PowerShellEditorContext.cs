@@ -21,7 +21,8 @@ namespace psedit
 
             CanAutocomplete = true;
             CanRun = true;
-
+            CanSyntaxHighlight = true;
+            
             // verify that psscriptanalyzer is available for formatting
             using (var powerShell = PowerShell.Create(RunspaceMode.CurrentRunspace))
             {

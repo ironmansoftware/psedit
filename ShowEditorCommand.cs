@@ -98,8 +98,8 @@ namespace psedit
                     }),
                     new MenuBarItem("_View", new []
                     {
-                        new MenuItem("Errors", "", () => ErrorDialog.Show(_runspace)),
-                        new MenuItem("Syntax Errors", "", () => SyntaxErrorDialog.Show(textEditor.Errors)),
+                        new MenuItem("Errors", "", () => { if (textEditor._language == LanguageEnum.Powershell) ErrorDialog.Show(_runspace); }),
+                        new MenuItem("Syntax Errors", "", () => { if (textEditor.CanSyntaxHighlight) SyntaxErrorDialog.Show(textEditor.Errors); }),
                         //new MenuItem("History", "", () => HistoryDialog.Show(_runspace))
                     }),
                     new MenuBarItem("_Debug", new []

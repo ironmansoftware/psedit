@@ -16,6 +16,7 @@ namespace psedit
         {
             _tabWidth = TabWidth;
             CanFormat = true;
+            CanSyntaxHighlight = true;
         }
         public Terminal.Gui.Color GetColor(JsonToken token)
         {
