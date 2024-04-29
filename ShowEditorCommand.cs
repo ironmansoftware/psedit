@@ -1,10 +1,8 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
-using System.Text;
 using Terminal.Gui;
 using System.Collections.Generic;
 
@@ -14,15 +12,16 @@ namespace psedit
     [Alias("psedit")]
     public class ShowEditorCommand : PSCmdlet
     {
-        private PowerShellEditorTextView textEditor;
+        private EditorTextView textEditor;
         private StatusBar statusBar;
         private StatusItem fileNameStatus;
         private StatusItem position;
         private StatusItem cursorStatus;
+        private StatusItem languageStatus;
         private Toplevel top;
         private Runspace _runspace;
         private string currentDirectory;
-
+        private string _fileName;
         #region Find and replace variables
         private Window _winDialog;
         private TabView _tabView;
@@ -48,7 +47,7 @@ namespace psedit
 
         protected override void ProcessRecord()
         {
-            textEditor = new PowerShellEditorTextView(_runspace);
+            textEditor = new EditorTextView(_runspace);
             textEditor.UnwrappedCursorPosition += (k) =>
             {
                 UpdatePosition();
@@ -69,12 +68,11 @@ namespace psedit
 
             Application.Init();
             top = Application.Top;
-
+            languageStatus = new StatusItem(Key.Unknown, "Text", () => { });
             var versionStatus = new StatusItem(Key.Unknown, base.MyInvocation.MyCommand.Module.Version.ToString(), () => { });
             position = new StatusItem(Key.Unknown, "", () => { });
             cursorStatus = new StatusItem(Key.Unknown, "", () => { });
-
-            statusBar = new StatusBar(new StatusItem[] { fileNameStatus, versionStatus, position, cursorStatus });
+            statusBar = new StatusBar(new StatusItem[] { fileNameStatus, versionStatus, position, cursorStatus, languageStatus });
 
             top.Add(new MenuBar(new MenuBarItem[] {
                 new MenuBarItem ("_File", new MenuItem [] {
@@ -95,13 +93,13 @@ namespace psedit
                         null,
                         new MenuItem ("_Select All", "", () => SelectAll(), shortcut: Key.CtrlMask | Key.T),
                         null,
-                        new MenuItem("Format", "", Format, CanFormat, shortcut: Key.CtrlMask | Key.ShiftMask | Key.R),
+                        new MenuItem("Format", "", Format, shortcut: Key.CtrlMask | Key.ShiftMask | Key.R),
                         //new MenuItem("Autocomplete", "", Autocomplete, shortcut: Key.CtrlMask | Key.Space),
                     }),
                     new MenuBarItem("_View", new []
                     {
-                        new MenuItem("Errors", "", () => ErrorDialog.Show(_runspace)),
-                        new MenuItem("Syntax Errors", "", () => SyntaxErrorDialog.Show(textEditor.Errors.Values.ToArray())),
+                        new MenuItem("Errors", "", () => { if (textEditor._language == LanguageEnum.Powershell) ErrorDialog.Show(_runspace); }),
+                        new MenuItem("Syntax Errors", "", () => { if (textEditor.CanSyntaxHighlight) SyntaxErrorDialog.Show(textEditor.Errors); }),
                         //new MenuItem("History", "", () => HistoryDialog.Show(_runspace))
                     }),
                     new MenuBarItem("_Debug", new []
@@ -118,7 +116,7 @@ namespace psedit
                                 FileName = "https://docs.poshtools.com/powershell-pro-tools-documentation/powershell-module/show-pseditor",
                                 UseShellExecute = true
                             };
-                            Process.Start (psi);
+                            Process.Start(psi);
                         })
                     })
                 }));
@@ -149,8 +147,6 @@ namespace psedit
                 }
             };
 
-            textEditor.Autocomplete.SelectionKey = Key.Tab;
-
             top.Add(textEditor);
             top.Add(statusBar);
 
@@ -165,45 +161,61 @@ namespace psedit
                 _runspace.Dispose();
             }
         }
-
-        private bool? _canFormat;
-
-        private bool CanFormat()
+        private void SetLanguage(string path)
         {
-            if (!_canFormat.HasValue)
+            var extension = System.IO.Path.GetExtension(path);
+
+            switch (extension)
             {
-                _canFormat = InvokeCommand.InvokeScript("Get-Module PSScriptAnalyzer -ListAvailable").Any();
+                case ".ps1": case ".psm1": case ".psd1":
+                    textEditor.SetLanguage(LanguageEnum.Powershell);
+                    break;
+                case ".json":
+                    textEditor.SetLanguage(LanguageEnum.JSON);
+                    break;
+                case ".txt":
+                    textEditor.SetLanguage(LanguageEnum.Text);
+                    break;
+                default:
+                    textEditor.SetLanguage(LanguageEnum.Text);
+                    break;
             }
-            return _canFormat.Value;
         }
 
         private void Format()
         {
-            try
+            if (textEditor.CanFormat)
             {
-                var formatValue = textEditor.Text.ToString();
-                if (!System.String.IsNullOrEmpty(formatValue))
+                try
                 {
-                    var previousCursorPosition = textEditor.CursorPosition;
-                    var previousTopRow = textEditor.TopRow;
-                    using (var powerShell = PowerShell.Create(RunspaceMode.CurrentRunspace))
+                    var formatValue = textEditor.Text.ToString();
+                    if (!System.String.IsNullOrEmpty(formatValue))
                     {
-                        powerShell.AddCommand("Invoke-Formatter");
-                        powerShell.AddParameter("ScriptDefinition", formatValue);
-                        var result = powerShell.Invoke();
-                        var formatted = result.FirstOrDefault();
-                        if (formatted != null)
+                        var previousCursorPosition = textEditor.CursorPosition;
+                        var previousTopRow = textEditor.TopRow;
+                        // format text in editor
+                        textEditor.Format();
+                        if (textEditor.Text != _originalText)
                         {
-                            textEditor.Text = formatted.BaseObject as string;
-                            textEditor.CursorPosition = previousCursorPosition;
-                            textEditor.TopRow = previousTopRow;
+                            if (!fileNameStatus.Title.EndsWith("*"))
+                            {
+                                fileNameStatus.Title += "*";
+                                textEditor.modified = true;
+                            }
                         }
+                        else 
+                        {
+                            textEditor.modified = false;
+                            fileNameStatus.Title = fileNameStatus.Title.TrimEnd("*");
+                        }
+                        textEditor.TopRow = previousTopRow;  
+                        textEditor.CursorPosition = previousCursorPosition;
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.ErrorQuery("Formatting Failed", ex.Message);
+                catch (Exception ex)
+                {
+                    MessageBox.ErrorQuery("Formatting Failed", ex.Message);
+                }
             }
         }
         private bool CanCloseFile()
@@ -212,9 +224,9 @@ namespace psedit
             {
                 return true;
             }
-
+            var fileName = _fileName != null ? _fileName : fileNameStatus.Title;
             var r = MessageBox.ErrorQuery("Save File",
-                $"Do you want save changes in {fileNameStatus.Title}?", "Yes", "No", "Cancel");
+                $"Do you want save changes in {fileName}?", "Yes", "No", "Cancel");
             if (r == 0) 
             {
                 return Save(false);
@@ -235,6 +247,10 @@ namespace psedit
             }
             List<string> allowedFileTypes = new List<string>();
             allowedFileTypes.Add(".ps1");
+            allowedFileTypes.Add(".psm1");
+            allowedFileTypes.Add(".psd1");
+            allowedFileTypes.Add(".json");
+            allowedFileTypes.Add(".txt");
             var dialog = new OpenDialog("Open file", "", allowedFileTypes);
             dialog.CanChooseDirectories = false;
             dialog.CanChooseFiles = true;
@@ -248,7 +264,7 @@ namespace psedit
                 return;
             }
 
-            if (!System.IO.Path.HasExtension(dialog.FilePath.ToString()) || !System.IO.Path.GetExtension(dialog.FilePath.ToString()).Equals(".ps1", StringComparison.CurrentCultureIgnoreCase))
+            if (!System.IO.Path.HasExtension(dialog.FilePath.ToString()))
             {
                 return;
             }
@@ -282,8 +298,16 @@ namespace psedit
             if (Path != null)
             {
                 textEditor.LoadFile(Path);
+                textEditor.modified = false;
                 _originalText = textEditor.Text.ToByteArray();
-                fileNameStatus.Title = System.IO.Path.GetFileName(Path);
+                _fileName = System.IO.Path.GetFileName(Path);
+                currentDirectory = System.IO.Path.GetDirectoryName(Path);
+                fileNameStatus.Title = _fileName;
+                SetLanguage(Path);
+                if (statusBar != null)
+                {
+                    UpdatePosition();
+                }
             }
         }
 
@@ -291,156 +315,76 @@ namespace psedit
         {
             var text = textEditor.Text.ToString();
 
-            try
+            if (textEditor.CanRun)
             {
-                Application.RequestStop();
-            }
-            catch { }
-
-            if (Path != null)
-            {
-                Save(false);
-                using (var powerShell = PowerShell.Create(RunspaceMode.CurrentRunspace))
+                try
                 {
-                    powerShell.AddScript($". {Path}");
-                    powerShell.AddCommand("Out-Default");
-                    powerShell.Invoke();
+                    Application.RequestStop();
                 }
-            }
-            else
-            {
-                using (var powerShell = PowerShell.Create(RunspaceMode.CurrentRunspace))
+                catch { }
+                
+                if (Path != null)
                 {
-                    powerShell.AddScript(text);
-                    powerShell.AddCommand("Out-Default");
-                    powerShell.Invoke();
+                    Save(false);
+                    textEditor.Run(Path, true);
+                }
+                else
+                {
+                    textEditor.RunText(text, true);
                 }
             }
         }
 
         private void Run()
         {
-            StringBuilder output = new StringBuilder();
-            if (Path != null)
+            if (textEditor.CanRun)
             {
-                Save(false);
-
-                using (var ps = PowerShell.Create())
+                string output = String.Empty;
+                if (Path != null)
                 {
-                    ps.Runspace = _runspace;
-                    ps.AddScript($". '{Path}' | Out-String");
-                    try
-                    {
-                        var result = ps.Invoke<string>();
-
-                        if (ps.HadErrors)
-                        {
-                            foreach (var error in ps.Streams.Error)
-                            {
-                                output.AppendLine(error.ToString());
-                            }
-                        }
-
-                        foreach (var r in result)
-                        {
-                            output.AppendLine(r.ToPlainText());
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        output.AppendLine(ex.ToString());
-                    }
+                    Save(false);
+                    output = textEditor.Run(Path);
                 }
-            }
-            else
-            {
-                using (var ps = PowerShell.Create())
+                else
                 {
-                    ps.Runspace = _runspace;
-                    ps.AddScript(textEditor.Text.ToString());
-                    ps.AddCommand("Out-String");
-                    try
-                    {
-                        var result = ps.Invoke<string>(Path);
-
-                        if (ps.HadErrors)
-                        {
-                            foreach (var error in ps.Streams.Error)
-                            {
-                                output.AppendLine(error.ToString());
-                            }
-                        }
-
-                        foreach (var r in result)
-                        {
-                            output.AppendLine(r.ToPlainText());
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        output.AppendLine(ex.ToString());
-                    }
+                    output = textEditor.RunText(textEditor.Text.ToString());
                 }
+
+                var dialog = new Dialog();
+                var button = new Button("Ok");
+                dialog.AddButton(button);
+
+                dialog.Add(new TextView
+                {
+                    Text = output,
+                    Height = Dim.Fill(),
+                    Width = Dim.Fill()
+                });
+
+                Application.Run(dialog);
             }
-
-            var dialog = new Dialog();
-            var button = new Button("Ok");
-            dialog.AddButton(button);
-
-            dialog.Add(new TextView
-            {
-                Text = output.ToString(),
-                Height = Dim.Fill(),
-                Width = Dim.Fill()
-            });
-
-            Application.Run(dialog);
         }
 
         private void ExecuteSelection()
         {
-            StringBuilder output = new StringBuilder();
-
-            using (var ps = PowerShell.Create())
+            if (textEditor.CanRun)
             {
-                ps.Runspace = _runspace;
-                ps.AddScript(textEditor.SelectedText.ToString());
-                ps.AddCommand("Out-String");
-                try
-                {
-                    var result = ps.Invoke<string>();
+                string output = String.Empty;
+                output = textEditor.RunText(textEditor.SelectedText.ToString());
+    
+                var dialog = new Dialog();
+                var button = new Button("Ok");
+                dialog.AddButton(button);
 
-                    if (ps.HadErrors)
-                    {
-                        foreach (var error in ps.Streams.Error)
-                        {
-                            output.AppendLine(error.ToString());
-                        }
-                    }
-
-                    foreach (var r in result)
-                    {
-                        output.AppendLine(r.ToPlainText());
-                    }
-                }
-                catch (Exception ex)
+                dialog.Add(new TextView
                 {
-                    output.Append(ex.ToString());
-                }
+                    Text = output,
+                    Height = Dim.Fill(),
+                    Width = Dim.Fill()
+                });
+
+                Application.Run(dialog);
             }
-
-            var dialog = new Dialog();
-            var button = new Button("Ok");
-            dialog.AddButton(button);
-
-            dialog.Add(new TextView
-            {
-                Text = output.ToString(),
-                Height = Dim.Fill(),
-                Width = Dim.Fill()
-            });
-
-            Application.Run(dialog);
         }
 
         private void New()
@@ -450,9 +394,11 @@ namespace psedit
                 return;
             }
             fileNameStatus.Title = "Unsaved";
+            _fileName = "Unsaved";
             Path = null;
             _originalText = new System.IO.MemoryStream().ToArray();
             textEditor.Text = _originalText;
+            textEditor.SetLanguage(LanguageEnum.Powershell);
         }
 
         private bool Save(bool saveAs)
@@ -461,6 +407,10 @@ namespace psedit
             {
                 List<string> allowedFileTypes = new List<string>();
                 allowedFileTypes.Add(".ps1");
+                allowedFileTypes.Add(".psm1");
+                allowedFileTypes.Add(".psd1");
+                allowedFileTypes.Add(".json");
+                allowedFileTypes.Add(".txt");
                 var dialog = new SaveDialog(saveAs ? "Save file as" : "Save file", "", allowedFileTypes);
                 dialog.DirectoryPath = currentDirectory;
                 Application.Run(dialog);
@@ -470,20 +420,21 @@ namespace psedit
                     return false;
                 }
                 Path = dialog.FilePath.ToString();
+                _fileName = dialog.FileName.ToString();
                 fileNameStatus.Title = dialog.FileName;
             }
-            fileNameStatus.Title = fileNameStatus.Title.TrimEnd("*");
-            textEditor.modified = false;
             statusBar.SetNeedsDisplay();
 
             try
             {
-                if (!DisableFormatOnSave && CanFormat())
+                if (!DisableFormatOnSave && textEditor.CanFormat)
                 {
                     Format();
                 }
                 File.WriteAllText(Path, textEditor.Text.ToString());
                 _originalText = textEditor.Text.ToByteArray();
+                fileNameStatus.Title = fileNameStatus.Title.TrimEnd("*");
+                textEditor.modified = false;
                 return true;
             }
             catch (Exception ex)
@@ -862,29 +813,30 @@ namespace psedit
         #endregion
         private void UpdatePosition()
         {
-            if (textEditor.ColumnErrors.ContainsKey(textEditor.CursorPosition))
+            if (statusBar != null)
             {
-                cursorStatus.Title = textEditor.ColumnErrors[textEditor.CursorPosition];
-            }
-            else
-            {
-                cursorStatus.Title = string.Empty;
-            }
-            if ((textEditor.IsDirty == true || textEditor.modified == true) && !fileNameStatus.Title.EndsWith("*") && fileNameStatus.Title != "Unsaved")
-            {
-                fileNameStatus.Title += "*";
-            }
-            position.Title = $"Ln {textEditor.CursorPosition.Y + 1}, Col {textEditor.CursorPosition.X + 1}";
-            statusBar.SetNeedsDisplay();
-        }
+                if (textEditor.ColumnErrors.ContainsKey(textEditor.CursorPosition))
+                {
+                    cursorStatus.Title = textEditor.ColumnErrors[textEditor.CursorPosition];
+                }
+                else
+                {
+                    cursorStatus.Title = string.Empty;
+                }
+                if ((textEditor.IsDirty == true || textEditor.modified == true) && _originalText != textEditor.Text && !fileNameStatus.Title.EndsWith("*") && fileNameStatus.Title != "Unsaved")
+                {
+                    fileNameStatus.Title += "*";
+                }
+                else if (_originalText == textEditor.Text && fileNameStatus.Title.EndsWith("*"))
+                {
+                    fileNameStatus.Title = fileNameStatus.Title.TrimEnd("*");
+                }
 
-        private void Autocomplete()
-        {
-            var autocomplete = textEditor.Autocomplete as PowerShellAutocomplete;
+                position.Title = $"Ln {textEditor.CursorPosition.Y + 1}, Col {textEditor.CursorPosition.X + 1}";
+                languageStatus.Title = textEditor._language.ToString();
+                statusBar.SetNeedsDisplay();
+            }
 
-            autocomplete.Force();
-            autocomplete.RenderOverlay(textEditor.CursorPosition);
-            textEditor.Redraw(textEditor.Bounds);
         }
     }
 }
