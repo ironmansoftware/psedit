@@ -115,7 +115,7 @@ namespace psedit
         public override bool IsWordChar(Rune rune)
         {
             var c = (char)rune;
-            return Char.IsLetterOrDigit(c) || c == '$' || c == '-';
+            return Char.IsLetterOrDigit(c) || c == '$' || c == '-' || c == ':';
         }
 
         ///<inheritdoc/>
