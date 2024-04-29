@@ -58,7 +58,7 @@ namespace psedit
                 return true;
             };
 
-            fileNameStatus = new StatusItem(Key.Unknown, "Unsaved", () => { });
+            fileNameStatus = new StatusItem(Key.CtrlMask | Key.Q, "Unsaved", () => { Quit(); });
 
             if (Path != null)
             {
