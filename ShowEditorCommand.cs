@@ -827,6 +827,11 @@ namespace psedit
                 {
                     fileNameStatus.Title += "*";
                 }
+                else if (_originalText == textEditor.Text && fileNameStatus.Title.EndsWith("*"))
+                {
+                    fileNameStatus.Title = fileNameStatus.Title.TrimEnd("*");
+                }
+
                 position.Title = $"Ln {textEditor.CursorPosition.Y + 1}, Col {textEditor.CursorPosition.X + 1}";
                 languageStatus.Title = textEditor._language.ToString();
                 statusBar.SetNeedsDisplay();
