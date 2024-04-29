@@ -823,7 +823,7 @@ namespace psedit
                 {
                     cursorStatus.Title = string.Empty;
                 }
-                if ((textEditor.IsDirty == true || textEditor.modified == true) && !fileNameStatus.Title.EndsWith("*") && fileNameStatus.Title != "Unsaved")
+                if ((textEditor.IsDirty == true || textEditor.modified == true) && _originalText != textEditor.Text && !fileNameStatus.Title.EndsWith("*") && fileNameStatus.Title != "Unsaved")
                 {
                     fileNameStatus.Title += "*";
                 }
