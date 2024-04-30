@@ -20,6 +20,21 @@
             "stopAtEntry": false
         },
         {
+            "name": ".NET Launch (console)",
+            "type": "clr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "powershell",
+            "args": [
+                "-NoExit",
+                "-Command",
+                "& { Import-Module .\\psedit.psd1; Show-PSEditor}"
+            ],
+            "cwd": "${workspaceFolder}\\bin\\Debug\\netstandard2.0\\publish",
+            "console": "externalTerminal",
+            "stopAtEntry": false
+        },
+        {
             "name": ".NET Core Attach",
             "type": "coreclr",
             "request": "attach"
