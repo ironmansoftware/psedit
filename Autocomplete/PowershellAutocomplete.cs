@@ -45,7 +45,7 @@ namespace psedit
             }
         }
 
-        private void TryGenerateSuggestions()
+        private void TryGenerateSuggestions(int columnOffset = 0)
         {
             var host = (EditorTextView)HostControl;
             var offset = 0;
@@ -80,7 +80,7 @@ namespace psedit
             {
                 if (_suggestions != null)
                 {
-                    var word = GetCurrentWord();
+                    var word = GetCurrentWord(columnOffset);
                     if (!System.String.IsNullOrEmpty(word))
                     {
                         Suggestions = _suggestions.Where(m => m.StartsWith(word, StringComparison.OrdinalIgnoreCase)).ToList().AsReadOnly();
@@ -103,11 +103,11 @@ namespace psedit
             }
         }
 
-        public override void GenerateSuggestions()
+        public override void GenerateSuggestions(int columnOffset = 0)
         {
             try
             {
-                TryGenerateSuggestions();
+                TryGenerateSuggestions(columnOffset);
             }
             catch { }
         }
@@ -119,12 +119,12 @@ namespace psedit
         }
 
         ///<inheritdoc/>
-        protected override string GetCurrentWord()
+        protected override string GetCurrentWord(int columnOffset = 0)
         {
             var host = (TextView)HostControl;
             var currentLine = host.GetCurrentLine();
             var cursorPosition = Math.Min(host.CurrentColumn, currentLine.Count);
-            return IdxToWord(currentLine, cursorPosition);
+            return IdxToWord(currentLine, cursorPosition, columnOffset);
         }
 
         /// <inheritdoc/>
