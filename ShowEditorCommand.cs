@@ -30,6 +30,7 @@ namespace psedit
         private bool _matchCase;
         private bool _matchWholeWord;
         #endregion
+        private List<string> _allowedFileTypes = new List<string>();
 
         [Parameter(ParameterSetName = "Path", ValueFromPipeline = true, Position = 0)]
         public string Path { get; set; }
@@ -43,6 +44,12 @@ namespace psedit
             _runspace = RunspaceFactory.CreateRunspace();
             _runspace.Open();
             currentDirectory = SessionState.Path.CurrentLocation.Path;
+            // populate the allowed file types for dialogs on startup
+            _allowedFileTypes.Add(".ps1");
+            _allowedFileTypes.Add(".psm1");
+            _allowedFileTypes.Add(".psd1");
+            _allowedFileTypes.Add(".json");
+            _allowedFileTypes.Add(".txt");
         }
 
         protected override void ProcessRecord()
@@ -245,13 +252,7 @@ namespace psedit
             {
                 return;
             }
-            List<string> allowedFileTypes = new List<string>();
-            allowedFileTypes.Add(".ps1");
-            allowedFileTypes.Add(".psm1");
-            allowedFileTypes.Add(".psd1");
-            allowedFileTypes.Add(".json");
-            allowedFileTypes.Add(".txt");
-            var dialog = new OpenDialog("Open file", "", allowedFileTypes);
+            var dialog = new OpenDialog("Open file", "", _allowedFileTypes);
             dialog.CanChooseDirectories = false;
             dialog.CanChooseFiles = true;
             dialog.AllowsMultipleSelection = false;
@@ -405,13 +406,7 @@ namespace psedit
         {
             if (string.IsNullOrEmpty(Path) || saveAs)
             {
-                List<string> allowedFileTypes = new List<string>();
-                allowedFileTypes.Add(".ps1");
-                allowedFileTypes.Add(".psm1");
-                allowedFileTypes.Add(".psd1");
-                allowedFileTypes.Add(".json");
-                allowedFileTypes.Add(".txt");
-                var dialog = new SaveDialog(saveAs ? "Save file as" : "Save file", "", allowedFileTypes);
+                var dialog = new SaveDialog(saveAs ? "Save file as" : "Save file", "", _allowedFileTypes);
                 dialog.DirectoryPath = currentDirectory;
                 Application.Run(dialog);
 
