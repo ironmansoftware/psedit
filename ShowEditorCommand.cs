@@ -118,12 +118,7 @@ namespace psedit
                     new MenuBarItem("_Help", new [] {
                         new MenuItem("_About", "", () => MessageBox.Query("About", $"PowerShell Pro Tools Terminal Editor\nVersion: {base.MyInvocation.MyCommand.Module.Version.ToString()}\n", "Ok")),
                         new MenuItem("_Docs", "", () => {
-                            var psi = new ProcessStartInfo
-                            {
-                                FileName = "https://docs.poshtools.com/powershell-pro-tools-documentation/powershell-module/show-pseditor",
-                                UseShellExecute = true
-                            };
-                            Process.Start(psi);
+                                MessageBox.Query("Documentation", "For documentation, please visit: https://github.com/ironmansoftware/psedit", "Ok");
                         })
                     })
                 }));
@@ -166,6 +161,10 @@ namespace psedit
             finally
             {
                 _runspace.Dispose();
+                if (!Console.IsInputRedirected)
+                {
+                    Console.Write("\u001b[?1h\u001b[?1003l");
+                }
             }
         }
         private void SetLanguage(string path)
