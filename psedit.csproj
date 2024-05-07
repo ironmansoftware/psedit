@@ -22,7 +22,7 @@
   </PropertyGroup>
 
   <Target Name="CopyAdditionalFiles" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
-    <!-- Copy psedit.psd1 and psedit.psm1 to the root output directory -->
+    <!-- Copy psedit.psd1 to the root output directory -->
     <Copy SourceFiles="psedit.psd1"
           DestinationFolder="bin\Debug"
           SkipUnchangedFiles="true" />
@@ -39,7 +39,7 @@
   </PropertyGroup>
 
   <Target Name="CopyAdditionalFilesRelease" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
-    <!-- Copy psedit.psd1 and psedit.psm1 to the root output directory -->
+    <!-- Copy psedit.psd1 to the root output directory -->
     <Copy SourceFiles="psedit.psd1"
           DestinationFolder="bin\Release"
           SkipUnchangedFiles="true" />
