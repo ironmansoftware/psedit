@@ -28,4 +28,4 @@ jobs:
         dotnet-version: 6.0.x
 
     - name: Build
-      run: dotnet publish
+      run: dotnet build -c Release

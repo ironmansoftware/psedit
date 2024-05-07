@@ -25,10 +25,10 @@ jobs:
         dotnet-version: 6.0.x
 
     - name: Build
-      run: dotnet publish -o psedit
+      run: dotnet build -c Release
 
     - name: Release
-      run: Publish-Module -Path .\psedit -NuGetApiKey $Env:APIKEY
+      run: Publish-Module -Path .\bin\Release -NuGetApiKey $Env:APIKEY
       env:
         APIKEY: ${{ secrets.APIKEY }}
       shell: pwsh
