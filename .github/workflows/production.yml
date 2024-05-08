@@ -24,11 +24,14 @@ jobs:
       with:
         dotnet-version: 6.0.x
 
-    - name: Build
-      run: dotnet publish -o psedit
+    - name: Build .NET Standard 2.1
+      run: dotnet build -c Release -f netstandard2.1
+    
+    - name: Build .NET Framework 4.7.2
+      run: dotnet build -c Release -f net472
 
     - name: Release
-      run: Publish-Module -Path .\psedit -NuGetApiKey $Env:APIKEY
+      run: Publish-Module -Path .\bin\Release -NuGetApiKey $Env:APIKEY
       env:
         APIKEY: ${{ secrets.APIKEY }}
       shell: pwsh

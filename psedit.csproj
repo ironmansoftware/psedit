@@ -1,19 +1,48 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.1;net472</TargetFrameworks>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
       <PackageReference Include="PowerShellStandard.Library" Version="5.1.1" />
-      <PackageReference Include="Terminal.Gui" Version="1.10.0" />
+      <PackageReference Include="Terminal.Gui" Version="1.16.0" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="psedit.psd1">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+  <!-- Output paths for Debug configuration -->
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)'=='Debug|netstandard2.1'">
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <OutputPath>bin\Debug\coreclr\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)'=='Debug|net472'">
+    <OutputPath>bin\Debug\clr\</OutputPath>
+  </PropertyGroup>
+
+  <Target Name="CopyAdditionalFiles" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
+    <!-- Copy psedit.psd1 to the root output directory -->
+    <Copy SourceFiles="psedit.psd1"
+          DestinationFolder="bin\Debug"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+  <!-- Output paths for Release configuration -->
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)'=='Release|netstandard2.1'">
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <OutputPath>bin\Release\coreclr\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)'=='Release|net472'">
+    <OutputPath>bin\Release\clr\</OutputPath>
+  </PropertyGroup>
+
+  <Target Name="CopyAdditionalFilesRelease" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <!-- Copy psedit.psd1 to the root output directory -->
+    <Copy SourceFiles="psedit.psd1"
+          DestinationFolder="bin\Release"
+          SkipUnchangedFiles="true" />
+  </Target>
 
 </Project>
