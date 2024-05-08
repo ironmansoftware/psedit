@@ -34,6 +34,13 @@ namespace psedit
 
         [Parameter(ParameterSetName = "Path", ValueFromPipeline = true, Position = 0)]
         public string Path { get; set; }
+
+        [Parameter(ParameterSetName = "Path", ValueFromPipeline = true, Position = 1, Mandatory = false)]
+        public int Line { get; set; }
+
+        [Parameter(ParameterSetName = "Path", ValueFromPipeline = true, Position = 2, Mandatory = false)]
+        public int Column { get; set; }
+
         private byte[] _originalText = new System.IO.MemoryStream().ToArray();
 
         [Parameter()]
@@ -66,13 +73,25 @@ namespace psedit
             };
 
             fileNameStatus = new StatusItem(Key.CtrlMask | Key.Q, "Unsaved", () => { Quit(); });
-
+            // Load the path if it was passed in
             if (Path != null)
             {
                 Path = GetUnresolvedProviderPathFromPSPath(Path);
                 LoadFile();
             }
-
+            // Set the cursor position if it was passed in
+            if (Line > 0 || Column > 0)
+            {
+                if (!(Line > 0))
+                {
+                    Line = 1;
+                }
+                if (!(Column > 0))
+                {
+                    Column = 1;
+                }
+                textEditor.CursorPosition = new Point(Column - 1, Line - 1);
+            }
             Application.Init();
             top = Application.Top;
             languageStatus = new StatusItem(Key.Unknown, "Text", () => { });
