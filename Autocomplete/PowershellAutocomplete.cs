@@ -58,7 +58,10 @@ namespace psedit
                 }
                 else
                 {
-                    offset += host.Runes[lineOffset].Count + Environment.NewLine.Length;
+                    if (host.Runes != null)
+                    {
+                        offset += host.Runes[lineOffset].Count + Environment.NewLine.Length;
+                    }
                 }
             }
             var text = host.Text.ToString();
