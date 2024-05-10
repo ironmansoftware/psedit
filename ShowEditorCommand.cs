@@ -59,6 +59,21 @@ namespace psedit
             _allowedFileTypes.Add(".txt");
         }
 
+        private MenuItem CreateAllowsTabChecked()
+        {
+            var item = new MenuItem
+            {
+                Title = "Allows Tab"
+            };
+            item.CheckType |= MenuItemCheckStyle.Checked;
+            item.Checked = textEditor.AllowsTab;
+            item.Action += () =>
+            {
+                textEditor.AllowsTab = item.Checked = !item.Checked;
+            };
+
+            return item;
+        }
         protected override void ProcessRecord()
         {
             textEditor = new EditorTextView(_runspace);
@@ -118,9 +133,13 @@ namespace psedit
                         new MenuItem ("_Replace", "", () => Replace(), shortcut: Key.CtrlMask | Key.H),
                         null,
                         new MenuItem ("_Select All", "", () => SelectAll(), shortcut: Key.CtrlMask | Key.T),
-                        null,
-                        new MenuItem("Format", "", Format, shortcut: Key.CtrlMask | Key.ShiftMask | Key.R),
                         //new MenuItem("Autocomplete", "", Autocomplete, shortcut: Key.CtrlMask | Key.Space),
+                    }),
+                    new MenuBarItem("_Format", new []
+                    {
+                        CreateAllowsTabChecked(),
+                        null,
+                        new MenuItem("Format", "", Format, shortcut: Key.CtrlMask | Key.ShiftMask | Key.R)
                     }),
                     new MenuBarItem("_View", new []
                     {

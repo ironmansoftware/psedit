@@ -21,6 +21,7 @@ namespace psedit
         public LanguageEnum _language = LanguageEnum.Powershell;
         public EditorTextView(Runspace runspace)
         {
+            AllowsTab = false;
             _runspace = runspace;
             SetLanguage(LanguageEnum.Powershell);
         }
