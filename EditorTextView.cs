@@ -37,7 +37,7 @@ namespace psedit
                 Autocomplete.MaxWidth = 30;
                 Autocomplete.MaxHeight = 10;
                 Autocomplete.HostControl = this;
-                Autocomplete.SelectionKey = Key.Tab;
+                Autocomplete.SelectionKey = Key.Enter;
             }
             else if (language == LanguageEnum.JSON)
             {
