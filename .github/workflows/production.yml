@@ -31,7 +31,7 @@ jobs:
       run: dotnet build -c Release -f net472
 
     - name: Release
-      run: 
+      run: |
         Install-Module Microsoft.PowerShell.PSResourceGet 
         Publish-PSResource -Path .\bin\Release -ApiKey $Env:APIKEY
       env:
