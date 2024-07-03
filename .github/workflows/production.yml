@@ -32,7 +32,7 @@ jobs:
 
     - name: Release
       run: |
-        Install-Module Microsoft.PowerShell.PSResourceGet 
+        Install-Module Microsoft.PowerShell.PSResourceGet -Scope CurrentUser -Force
         Publish-PSResource -Path .\bin\Release -ApiKey $Env:APIKEY
       env:
         APIKEY: ${{ secrets.APIKEY }}
