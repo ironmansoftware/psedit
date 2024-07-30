@@ -15,7 +15,7 @@
                 "-Command",
                 "& { Import-Module .\\psedit.psd1; Show-PSEditor}"
             ],
-            "cwd": "${workspaceFolder}\\bin\\Debug",
+            "cwd": "${workspaceFolder}\\bin\\Debug\\netstandard2.0\\publish",
             "console": "externalTerminal",
             "stopAtEntry": false
         },
@@ -30,7 +30,7 @@
                 "-Command",
                 "& { Import-Module .\\psedit.psd1; Show-PSEditor}"
             ],
-            "cwd": "${workspaceFolder}\\bin\\Debug",
+            "cwd": "${workspaceFolder}\\bin\\Debug\\netstandard2.0\\publish",
             "console": "externalTerminal",
             "stopAtEntry": false
         },

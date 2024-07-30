@@ -24,16 +24,13 @@ jobs:
       with:
         dotnet-version: 6.0.x
 
-    - name: Build .NET Standard 2.1
-      run: dotnet build -c Release -f netstandard2.1
-    
-    - name: Build .NET Framework 4.7.2
-      run: dotnet build -c Release -f net472
+    - name: Build
+      run: dotnet publish -o psedit
 
     - name: Release
       run: |
         Install-Module Microsoft.PowerShell.PSResourceGet -Scope CurrentUser -Force
-        Publish-PSResource -Path .\bin\Release -ApiKey $Env:APIKEY
+        Publish-PSResource -Path .\psedit -ApiKey $Env:APIKEY
       env:
         APIKEY: ${{ secrets.APIKEY }}
       shell: pwsh
