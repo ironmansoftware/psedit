@@ -9,14 +9,7 @@
 @{
 
     # Script module or binary module file associated with this manifest.
-    RootModule = if($PSEdition -eq 'Core')
-    {
-        'coreclr\psedit.dll'
-    }
-    else # Desktop
-    {
-        'clr\psedit.dll'
-    }
+    RootModule      = 'psedit.dll'
     # Version number of this module.
     ModuleVersion   = '0.0.7'
 
