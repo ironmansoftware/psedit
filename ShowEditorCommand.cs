@@ -57,6 +57,8 @@ namespace psedit
             _allowedFileTypes.Add(".psd1");
             _allowedFileTypes.Add(".json");
             _allowedFileTypes.Add(".txt");
+            _allowedFileTypes.Add(".yaml");
+            _allowedFileTypes.Add(".yml");
         }
 
         private MenuItem CreateAllowsTabChecked()
