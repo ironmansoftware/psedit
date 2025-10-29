@@ -2,8 +2,9 @@ namespace psedit
 {
     public enum LanguageEnum
     {
-        Text,
-        Powershell,
-        JSON
+    Text,
+    Powershell,
+    JSON,
+    YAML
     }
 }
