@@ -43,7 +43,11 @@ namespace psedit
             {
                 editorContext = new JSONEditorContext(TabWidth);
             }
-            else 
+            else if (language == LanguageEnum.YAML)
+            {
+                editorContext = new YamlEditorContext(TabWidth);
+            }
+            else
             {
                 editorContext = null;
             }
