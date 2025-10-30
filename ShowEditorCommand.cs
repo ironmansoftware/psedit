@@ -12,7 +12,8 @@ namespace psedit
     [Alias("psedit")]
     public class ShowEditorCommand : PSCmdlet
     {
-        private EditorTextView textEditor;
+    private EditorTextView textEditor;
+    private RemoteFileManagerService remoteFileManager = new RemoteFileManagerService();
         private StatusBar statusBar;
         private StatusItem fileNameStatus;
         private StatusItem position;
@@ -290,7 +291,7 @@ namespace psedit
             return false;
         }
 
-        private void Open()
+        private async void Open()
         {
             if (!CanCloseFile())
             {
@@ -316,8 +317,31 @@ namespace psedit
 
             try
             {
-                Path = dialog.FilePath.ToString();
-                LoadFile();
+                // Example: If path starts with "psremoting:", treat as remote
+                if (dialog.FilePath.ToString().StartsWith("psremoting:", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Placeholder: Replace with actual remoting fetch logic
+                    string remotePath = dialog.FilePath.ToString().Substring("psremoting:".Length);
+                    string localTempPath = await remoteFileManager.FetchRemoteFileAsync(remotePath, async (remoteFile) => {
+                        // TODO: Implement actual PSRemoting fetch logic here
+                        // For now, just return null
+                        return null;
+                    });
+                    if (localTempPath != null)
+                    {
+                        Path = localTempPath;
+                        LoadFile();
+                    }
+                    else
+                    {
+                        MessageBox.ErrorQuery("Failed", "Failed to fetch remote file.", "Ok");
+                    }
+                }
+                else
+                {
+                    Path = dialog.FilePath.ToString();
+                    LoadFile();
+                }
             }
             catch (Exception ex)
             {
@@ -446,7 +470,7 @@ namespace psedit
             textEditor.SetLanguage(LanguageEnum.Powershell);
         }
 
-        private bool Save(bool saveAs)
+        private async Task<bool> SaveAsync(bool saveAs)
         {
             if (string.IsNullOrEmpty(Path) || saveAs)
             {
@@ -470,7 +494,25 @@ namespace psedit
                 {
                     Format();
                 }
-                File.WriteAllText(Path, textEditor.Text.ToString());
+                // Example: If path starts with "psremoting:", treat as remote
+                if (Path.StartsWith("psremoting:", StringComparison.OrdinalIgnoreCase))
+                {
+                    string remotePath = Path.Substring("psremoting:".Length);
+                    bool result = await remoteFileManager.SaveRemoteFileAsync(Path, async (remoteFile, content) => {
+                        // TODO: Implement actual PSRemoting save logic here
+                        // For now, just return false
+                        return false;
+                    }, remotePath);
+                    if (!result)
+                    {
+                        MessageBox.ErrorQuery("Failed", "Failed to save remote file.", "Ok");
+                        return false;
+                    }
+                }
+                else
+                {
+                    File.WriteAllText(Path, textEditor.Text.ToString());
+                }
                 _originalText = textEditor.Text.ToByteArray();
                 fileNameStatus.Title = fileNameStatus.Title.TrimEnd("*");
                 textEditor.modified = false;
@@ -481,6 +523,12 @@ namespace psedit
                 MessageBox.ErrorQuery("Failed", "Failed to save. " + ex.Message, "Ok");
             }
             return false;
+        }
+
+        // For compatibility with existing code, keep the old Save signature
+        private bool Save(bool saveAs)
+        {
+            return SaveAsync(saveAs).GetAwaiter().GetResult();
         }
 
         private void SelectAll()
