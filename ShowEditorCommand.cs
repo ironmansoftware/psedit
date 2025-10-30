@@ -157,22 +157,13 @@ namespace psedit
                     }),
                     new MenuBarItem("_Help", new [] {
                         new MenuItem("_About", "", () => MessageBox.Query("About", $"PowerShell Pro Tools Terminal Editor\nVersion: {base.MyInvocation.MyCommand.Module.Version.ToString()}\n", "Ok")),
-                        new MenuItem("_Docs", "", () => {
-                            var dialog = new Dialog("Documentation", 60, 7);
-                            var label = new Label(2, 1, "View the documentation for psedit.");
-                            var viewDocsButton = new Button(2, 3, "View Docs");
-                            viewDocsButton.Clicked += () => {
-                                try {
-                                    Process.Start(new ProcessStartInfo {
-                                        FileName = "https://github.com/ironmansoftware/psedit",
-                                        UseShellExecute = true
-                                    });
-                                } catch {}
-                            };
-                            var closeButton = new Button(15, 3, "Close");
-                            closeButton.Clicked += () => Application.RequestStop();
-                            dialog.Add(label, viewDocsButton, closeButton);
-                            Application.Run(dialog);
+                        new MenuItem("_GitHub", "", () => {
+                            try {
+                                Process.Start(new ProcessStartInfo {
+                                    FileName = "https://github.com/ironmansoftware/psedit",
+                                    UseShellExecute = true
+                                });
+                            } catch {}
                         })
                     })
                 }));
