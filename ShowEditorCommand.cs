@@ -41,13 +41,28 @@ namespace psedit
         [Parameter(ParameterSetName = "Path", ValueFromPipeline = true, Position = 2, Mandatory = false)]
         public int Column { get; set; }
 
+        [Parameter()]
+        public string ConfigurationFile { get; set; }
+
         private byte[] _originalText = new System.IO.MemoryStream().ToArray();
 
         [Parameter()]
         public SwitchParameter DisableFormatOnSave { get; set; }
 
         protected override void BeginProcessing()
-        {
+        {            
+            // Load theme from specified config file or default location
+            string configPath = ConfigurationFile;
+            if (string.IsNullOrEmpty(configPath))
+            {
+                var documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                configPath = System.IO.Path.Combine(documents, "psedit.json");
+            }
+            if (File.Exists(configPath))
+            {
+                ThemeService.Instance.LoadTheme(configPath);
+            }
+
             _runspace = RunspaceFactory.CreateRunspace();
             _runspace.Open();
             currentDirectory = SessionState.Path.CurrentLocation.Path;
@@ -59,6 +74,8 @@ namespace psedit
             _allowedFileTypes.Add(".txt");
             _allowedFileTypes.Add(".yaml");
             _allowedFileTypes.Add(".yml");
+
+            // ...existing code...
         }
 
         private MenuItem CreateAllowsTabChecked()
