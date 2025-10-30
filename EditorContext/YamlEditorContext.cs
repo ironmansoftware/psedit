@@ -22,32 +22,26 @@ namespace psedit
         }
     public Terminal.Gui.Color GetColor(ParsingEvent token)
         {
-            Color textColor = Color.White;
+            var theme = ThemeService.Instance;
             switch (token)
             {
                 case StreamStart _:
                 case StreamEnd _:
                 case DocumentStart _:
                 case DocumentEnd _:
-                    textColor = Color.BrightYellow;
-                    break;
+                    return theme.GetColor("Warning");
                 case Scalar scalar:
-                    textColor = Color.Brown;
-                    break;
+                    return theme.GetColor("String");
                 case SequenceStart _:
                 case SequenceEnd _:
                 case MappingStart _:
                 case MappingEnd _:
-                    textColor = Color.Cyan;
-                    break;
+                    return theme.GetColor("Accent");
                 case Comment _:
-                    textColor = Color.Green;
-                    break;
+                    return theme.GetColor("Comment");
                 default:
-                    textColor = Color.White;
-                    break;
+                    return theme.GetColor("Foreground");
             }
-            return textColor;
         }
     public Dictionary<Point, Color> ParseYamlToken(string text, List<List<Rune>> Runes)
         {

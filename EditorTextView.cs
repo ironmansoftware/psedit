@@ -104,14 +104,16 @@ namespace psedit
         }
         private void ColorNormal()
         {
-            // this is default color / background when there is no content
-            Driver.SetAttribute(Terminal.Gui.Attribute.Make(Color.Green, Color.Black));
+            // Use theme colors for normal background
+            var theme = ThemeService.Instance;
+            Driver.SetAttribute(Terminal.Gui.Attribute.Make(theme.GetColor("Background"), theme.GetColor("Background")));
         }
 
         private void ColorSelected()
         {
-            // this is default color / background when content is selected
-            Driver.SetAttribute(Terminal.Gui.Attribute.Make(Color.Green, Color.Blue));
+            // Use theme colors for selection
+            var theme = ThemeService.Instance;
+            Driver.SetAttribute(Terminal.Gui.Attribute.Make(theme.GetColor("Background"), theme.GetColor("Accent")));
         }
         public override void Redraw(Rect bounds)
         {
@@ -157,17 +159,18 @@ namespace psedit
                         var errorPoint = new Point(idxCol, idxRow);
                         var color = editorContext.GetColorByPoint(point);
 
+                        var theme = ThemeService.Instance;
                         if (Selecting && PointInSelection(idxCol, idxRow))
                         {
-                            Driver.SetAttribute(Terminal.Gui.Attribute.Make(color, Color.Blue));
+                            Driver.SetAttribute(Terminal.Gui.Attribute.Make(color, theme.GetColor("Accent")));
                         }
                         else if (ColumnErrors.ContainsKey(errorPoint))
                         {
-                            Driver.SetAttribute(Terminal.Gui.Attribute.Make(color, Color.Red));
+                            Driver.SetAttribute(Terminal.Gui.Attribute.Make(color, theme.GetColor("Error")));
                         }
                         else 
                         {
-                            Driver.SetAttribute(Terminal.Gui.Attribute.Make(color, Color.Black));
+                            Driver.SetAttribute(Terminal.Gui.Attribute.Make(color, theme.GetColor("Background")));
                         }
                     }
                     else if (Selecting && PointInSelection(idxCol, idxRow))

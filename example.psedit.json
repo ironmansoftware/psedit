@@ -1,0 +1,15 @@
+{
+  "Theme": {
+    "Colors": {
+      "Background": "Black",
+      "Foreground": "White",
+      "Accent": "Cyan",
+      "Error": "Red",
+      "Warning": "BrightYellow",
+      "Info": "Blue",
+      "String": "Green",
+      "Comment": "Green",
+      "Secondary": "Gray"
+    }
+  }
+}

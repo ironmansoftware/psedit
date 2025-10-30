@@ -38,73 +38,50 @@ namespace psedit
         }
         public Terminal.Gui.Color GetColor(Token token)
         {
-            Color textColor;
-            textColor = Color.White;
+            var theme = ThemeService.Instance;
+            if (token == null)
+                return theme.GetColor("Foreground");
 
-            if (token != null)
+            switch (token.Kind)
             {
-                switch (token.Kind)
-                {
-                    case TokenKind.If:
-                        textColor = Color.White;
-                        break;
-                    case TokenKind.Else:
-                        textColor = Color.White;
-                        break;
-                    case TokenKind.LCurly:
-                        textColor = Color.BrightYellow;
-                        break;
-                    case TokenKind.RCurly:
-                        textColor = Color.BrightYellow;
-                        break;
-                    case TokenKind.LParen:
-                        textColor = Color.White;
-                        break;
-                    case TokenKind.RParen:
-                        textColor = Color.White;
-                        break;
-                    case TokenKind.Parameter:
-                        textColor = Color.White;
-                        break;
-                    case TokenKind.Identifier:
-                        textColor = Color.BrightYellow;
-                        break;
-                    case TokenKind.Equals:
-                        textColor = Color.White;
-                        break;
-                    case TokenKind.Param:
-                        textColor = Color.White;
-                        break;
-                    case TokenKind.Function:
-                        textColor = Color.BrightBlue;
-                        break;
-                    case TokenKind.StringExpandable:
-                    case TokenKind.StringLiteral:
-                    case TokenKind.HereStringExpandable:
-                    case TokenKind.HereStringLiteral:
-                        textColor = Color.Brown;
-                        break;
-                    case TokenKind.Variable:
-                        textColor = Color.Cyan;
-                        break;
-                    case TokenKind.Comment:
-                        textColor = Color.Green;
-                        break;
-                    case TokenKind.Command:
-                    case TokenKind.Generic:
-                        if (token.TokenFlags == TokenFlags.CommandName)
-                            textColor = Color.BrightYellow;
-                        else
-                            textColor = Color.Gray;
-
-                        break;
-                    default:
-                        textColor = Color.White;
-                        break;
-                }
+                case TokenKind.If:
+                    return theme.GetColor("Foreground");
+                case TokenKind.Else:
+                    return theme.GetColor("Foreground");
+                case TokenKind.LCurly:
+                case TokenKind.RCurly:
+                    return theme.GetColor("Warning");
+                case TokenKind.LParen:
+                case TokenKind.RParen:
+                    return theme.GetColor("Foreground");
+                case TokenKind.Parameter:
+                    return theme.GetColor("Foreground");
+                case TokenKind.Identifier:
+                    return theme.GetColor("Warning");
+                case TokenKind.Equals:
+                    return theme.GetColor("Foreground");
+                case TokenKind.Param:
+                    return theme.GetColor("Foreground");
+                case TokenKind.Function:
+                    return theme.GetColor("Info");
+                case TokenKind.StringExpandable:
+                case TokenKind.StringLiteral:
+                case TokenKind.HereStringExpandable:
+                case TokenKind.HereStringLiteral:
+                    return theme.GetColor("String");
+                case TokenKind.Variable:
+                    return theme.GetColor("Accent");
+                case TokenKind.Comment:
+                    return theme.GetColor("Comment");
+                case TokenKind.Command:
+                case TokenKind.Generic:
+                    if (token.TokenFlags == TokenFlags.CommandName)
+                        return theme.GetColor("Warning");
+                    else
+                        return theme.GetColor("Secondary");
+                default:
+                    return theme.GetColor("Foreground");
             }
-
-            return textColor;
         }
         public List<ErrorParseResult> GetErrors(ParseError[] errors)
         {

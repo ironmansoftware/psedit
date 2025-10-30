@@ -45,6 +45,32 @@ You can format your code in the editor if you have `PSScriptAnalyzer` installed.
 Install-Module PSScriptAnalyzer
 ```
 
+## Theme Support
+
+PSEdit supports customizable themes via a `psedit.json` file in the working directory. If the file is not present, a default theme is used. The theme file allows you to override editor colors for backgrounds, text, errors, and more.
+
+### Example psedit.json
+
+```json
+{
+	"Theme": {
+		"Colors": {
+			"Background": "Black",
+			"Foreground": "White",
+			"Accent": "Cyan",
+			"Error": "Red",
+			"Warning": "Yellow",
+			"Info": "Blue",
+			"String": "Brown",
+			"Comment": "Green",
+			"Secondary": "Gray"
+		}
+	}
+}
+```
+
+If a color key is missing, the default value will be used. Changes to the theme file are loaded automatically when the editor starts.
+
 ## Execution
 
 To execute your script, press `F5` to run the entire script. If you want to execute a select, you can press `F8`. You can also execute the script in the terminal and exit the editor by pressing `Ctrl+Shift+F5`.
