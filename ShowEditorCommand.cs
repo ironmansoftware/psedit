@@ -5,6 +5,7 @@ using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using Terminal.Gui;
 using System.Collections.Generic;
+using PowerShellToolsPro.Cmdlets.Editor;
 
 namespace psedit
 {
@@ -164,6 +165,7 @@ namespace psedit
                     {
                         new MenuItem("Errors", "", () => { if (textEditor._language == LanguageEnum.Powershell) ErrorDialog.Show(_runspace); }),
                         new MenuItem("Syntax Errors", "", () => { if (textEditor.CanSyntaxHighlight) SyntaxErrorDialog.Show(textEditor.Errors); }),
+                        new MenuItem("Variables", "", () => { if (textEditor._language == LanguageEnum.Powershell) VariableDialog.Show(_runspace); }),
                         //new MenuItem("History", "", () => HistoryDialog.Show(_runspace))
                     }),
                     new MenuBarItem("_Debug", new []
