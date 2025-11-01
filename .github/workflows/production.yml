@@ -29,6 +29,8 @@ jobs:
     - name: Release
       run: |
         Install-Module Microsoft.PowerShell.PSResourceGet -Scope CurrentUser -Force
+        # Works around issue: https://github.com/PowerShell/PSResourceGet/issues/1806
+        Get-PSResourceRepository
         Publish-PSResource -Path .\psedit -ApiKey $Env:APIKEY -Repository PSGallery
       env:
         APIKEY: ${{ secrets.APIKEY }}
