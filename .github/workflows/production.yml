@@ -30,7 +30,8 @@ jobs:
     - name: Release
       run: |
         Install-Module Microsoft.PowerShell.PSResourceGet -Scope CurrentUser -Force
-        Publish-PSResource -Path .\psedit -ApiKey $Env:APIKEY
+        Register-PSResourceRepository -PSGallery
+        Publish-PSResource -Path .\psedit -ApiKey $Env:APIKEY -Repository PSGallery
       env:
         APIKEY: ${{ secrets.APIKEY }}
       shell: pwsh
