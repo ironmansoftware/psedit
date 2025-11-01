@@ -2,15 +2,8 @@ name: Production
 
 on: [workflow_dispatch]
   
-
 jobs:
-
   build:
-
-    strategy:
-      matrix:
-        configuration: [Release]
-
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -24,14 +17,14 @@ jobs:
         dotnet-version: 6.0.x
 
     - name: Build
-      run: dotnet publish .\psedit.csproj -o psedit
+      run: dotnet publish ./psedit.csproj -o psedit --configuration Release
 
     - name: Release
       run: |
         Install-Module Microsoft.PowerShell.PSResourceGet -Scope CurrentUser -Force
         # Works around issue: https://github.com/PowerShell/PSResourceGet/issues/1806
         Get-PSResourceRepository
-        Publish-PSResource -Path .\psedit -ApiKey $Env:APIKEY -Repository PSGallery
+        Publish-PSResource -Path ./psedit -ApiKey $Env:APIKEY -Repository PSGallery
       env:
         APIKEY: ${{ secrets.APIKEY }}
       shell: pwsh
