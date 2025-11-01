@@ -8,15 +8,8 @@ using Terminal.Gui;
 
 namespace psedit
 {
-    public class PowershellAutocomplete : Autocomplete
+    public class PowershellAutocomplete(Runspace runspace) : Autocomplete
     {
-        private readonly Runspace _runspace;
-
-        public PowershellAutocomplete(Runspace runspace)
-        {
-            _runspace = runspace;
-        }
-
         private IEnumerable<string> _suggestions;
 
         public void Force()
@@ -36,13 +29,11 @@ namespace psedit
                 }
             }
 
-            using (var powerShell = PowerShell.Create())
-            {
-                powerShell.Runspace = _runspace;
-                var results = CommandCompletion.CompleteInput(host.Text.ToString(), offset, new Hashtable(), powerShell);
-                Suggestions = results.CompletionMatches.Select(m => m.CompletionText).ToList().AsReadOnly();
-                _suggestions = Suggestions;
-            }
+            using var powerShell = PowerShell.Create();
+            powerShell.Runspace = runspace;
+            var results = CommandCompletion.CompleteInput(host.Text.ToString(), offset, new Hashtable(), powerShell);
+            Suggestions = results.CompletionMatches.Select(m => m.CompletionText).ToList().AsReadOnly();
+            _suggestions = Suggestions;
         }
 
         private void TryGenerateSuggestions(int columnOffset = 0)
@@ -97,13 +88,11 @@ namespace psedit
                 return;
             }
 
-            using (var powerShell = PowerShell.Create())
-            {
-                powerShell.Runspace = _runspace;
-                var results = CommandCompletion.CompleteInput(host.Text.ToString(), offset, new Hashtable(), powerShell);
-                Suggestions = results.CompletionMatches.Select(m => m.CompletionText).ToList().AsReadOnly();
-                _suggestions = Suggestions;
-            }
+            using var powerShell = PowerShell.Create();
+            powerShell.Runspace = runspace;
+            var results = CommandCompletion.CompleteInput(host.Text.ToString(), offset, new Hashtable(), powerShell);
+            Suggestions = results.CompletionMatches.Select(m => m.CompletionText).ToList().AsReadOnly();
+            _suggestions = Suggestions;
         }
 
         public override void GenerateSuggestions(int columnOffset = 0)
