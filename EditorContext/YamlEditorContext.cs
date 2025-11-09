@@ -37,9 +37,9 @@ namespace psedit
                     }
                     return theme.GetColor("String");
                 case SequenceStart _:
-                    return theme.GetColor("Secondary");
+                    return theme.GetColor("Warning");
                 case SequenceEnd _:
-                    return theme.GetColor("Secondary");
+                    return theme.GetColor("Warning");
                 case MappingStart _:
                 case MappingEnd _:
                     return theme.GetColor("Accent");
@@ -83,6 +83,7 @@ namespace psedit
                     var endIndex = parser.Current != null ? (int)parser.Current.End.Column : oldPos + 1;
                     var color = GetColor(token);
                     var result = new ParseResult { StartIndex = startIndex, EndIndex = endIndex, Color = color, LineNumber = lineNumber };
+                    Debug.WriteLine($"YAML Token: {token} Line: {lineNumber} StartIndex: {startIndex} EndIndex: {endIndex} Color: {color}");
                     resultList.Add(result);
                     oldPos = endIndex;
                 }
