@@ -37,7 +37,9 @@ namespace psedit
                     }
                     return theme.GetColor("String");
                 case SequenceStart _:
+                    return theme.GetColor("Secondary");
                 case SequenceEnd _:
+                    return theme.GetColor("Secondary");
                 case MappingStart _:
                 case MappingEnd _:
                     return theme.GetColor("Accent");
@@ -66,8 +68,8 @@ namespace psedit
                         break;
                     }
                     var token = parser.Current;
-                    // skip zero-length tokens
-                    if (parser.Current.Start == parser.Current.End)
+                    // skip tokens that dont have a position
+                    if (token is StreamStart or StreamEnd or DocumentStart or DocumentEnd or MappingStart or MappingEnd)
                     {
                         continue;
                     }
