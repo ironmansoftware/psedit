@@ -31,6 +31,10 @@ namespace psedit
                 case DocumentEnd _:
                     return theme.GetColor("Warning");
                 case Scalar scalar:
+                    if (scalar.IsKey)
+                    {
+                        return theme.GetColor("Info");
+                    }
                     return theme.GetColor("String");
                 case SequenceStart _:
                 case SequenceEnd _:
@@ -62,6 +66,11 @@ namespace psedit
                         break;
                     }
                     var token = parser.Current;
+                    // skip zero-length tokens
+                    if (parser.Current.Start == parser.Current.End)
+                    {
+                        continue;
+                    }
                     var lineNumber = parser.Current != null ? (int)parser.Current.Start.Line : oldLine + 1;
                     if (oldLine != lineNumber)
                     {
@@ -69,7 +78,7 @@ namespace psedit
                         oldPos = 1;
                     }
                     var startIndex = oldPos;
-                    var endIndex = parser.Current != null ? (int)parser.Current.Start.Column : oldPos + 1;
+                    var endIndex = parser.Current != null ? (int)parser.Current.End.Column : oldPos + 1;
                     var color = GetColor(token);
                     var result = new ParseResult { StartIndex = startIndex, EndIndex = endIndex, Color = color, LineNumber = lineNumber };
                     resultList.Add(result);
