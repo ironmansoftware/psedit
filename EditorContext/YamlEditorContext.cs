@@ -31,9 +31,15 @@ namespace psedit
                 case DocumentEnd _:
                     return theme.GetColor("Warning");
                 case Scalar scalar:
+                    if (scalar.IsKey)
+                    {
+                        return theme.GetColor("Info");
+                    }
                     return theme.GetColor("String");
                 case SequenceStart _:
+                    return theme.GetColor("Warning");
                 case SequenceEnd _:
+                    return theme.GetColor("Warning");
                 case MappingStart _:
                 case MappingEnd _:
                     return theme.GetColor("Accent");
@@ -62,16 +68,22 @@ namespace psedit
                         break;
                     }
                     var token = parser.Current;
+                    // skip tokens that dont have a position
+                    if (token is StreamStart or StreamEnd or DocumentStart or DocumentEnd or MappingStart or MappingEnd or SequenceStart or SequenceEnd)
+                    {
+                        continue;
+                    }
                     var lineNumber = parser.Current != null ? (int)parser.Current.Start.Line : oldLine + 1;
                     if (oldLine != lineNumber)
                     {
                         oldLine = lineNumber;
                         oldPos = 1;
                     }
-                    var startIndex = oldPos;
-                    var endIndex = parser.Current != null ? (int)parser.Current.Start.Column : oldPos + 1;
+                    var startIndex = parser.Current != null ? (int)parser.Current.Start.Column : oldPos + 1;
+                    var endIndex = parser.Current != null ? (int)parser.Current.End.Column -1 : oldPos + 1;
                     var color = GetColor(token);
                     var result = new ParseResult { StartIndex = startIndex, EndIndex = endIndex, Color = color, LineNumber = lineNumber };
+                    Debug.WriteLine($"YAML Token: {token} Line: {lineNumber} StartIndex: {startIndex} EndIndex: {endIndex} Color: {color}");
                     resultList.Add(result);
                     oldPos = endIndex;
                 }

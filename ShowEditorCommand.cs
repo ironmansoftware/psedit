@@ -246,6 +246,9 @@ namespace psedit
                 case ".txt":
                     textEditor.SetLanguage(LanguageEnum.Text);
                     break;
+                case ".yml": case ".yaml":
+                    textEditor.SetLanguage(LanguageEnum.YAML);
+                    break;
                 default:
                     textEditor.SetLanguage(LanguageEnum.Text);
                     break;
