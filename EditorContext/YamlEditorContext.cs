@@ -69,7 +69,7 @@ namespace psedit
                     }
                     var token = parser.Current;
                     // skip tokens that dont have a position
-                    if (token is StreamStart or StreamEnd or DocumentStart or DocumentEnd or MappingStart or MappingEnd)
+                    if (token is StreamStart or StreamEnd or DocumentStart or DocumentEnd or MappingStart or MappingEnd or SequenceStart or SequenceEnd)
                     {
                         continue;
                     }
@@ -79,8 +79,8 @@ namespace psedit
                         oldLine = lineNumber;
                         oldPos = 1;
                     }
-                    var startIndex = oldPos;
-                    var endIndex = parser.Current != null ? (int)parser.Current.End.Column : oldPos + 1;
+                    var startIndex = parser.Current != null ? (int)parser.Current.Start.Column : oldPos + 1;
+                    var endIndex = parser.Current != null ? (int)parser.Current.End.Column -1 : oldPos + 1;
                     var color = GetColor(token);
                     var result = new ParseResult { StartIndex = startIndex, EndIndex = endIndex, Color = color, LineNumber = lineNumber };
                     Debug.WriteLine($"YAML Token: {token} Line: {lineNumber} StartIndex: {startIndex} EndIndex: {endIndex} Color: {color}");
