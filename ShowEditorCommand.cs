@@ -94,6 +94,83 @@ namespace psedit
 
             return item;
         }
+        private void SetMenuBar(Toplevel top)
+        {
+
+            var menuItems = new List<MenuBarItem>();
+            menuItems.Add(new MenuBarItem("_File", new MenuItem[] {
+                                new MenuItem ("_New", "", New),
+                                new MenuItem ("_Open", "", Open, shortcut: Key.CtrlMask | Key.O),
+                                new MenuItem ("_Save", "", () => {
+                                    Save(false);
+                                }, shortcut: Key.CtrlMask | Key.S),
+                                new MenuItem ("Save As", "", () => {
+                                    Save(true);
+                                }),
+                                new MenuItem ("_Quit", "", Quit, shortcut: Key.CtrlMask | Key.Q)
+                            }));
+            menuItems.Add(new MenuBarItem("_Edit", new MenuItem[] {
+                                new MenuItem ("_Find", "", () => Find(), shortcut: Key.CtrlMask | Key.F),
+                                new MenuItem ("_Replace", "", () => Replace(), shortcut: Key.CtrlMask | Key.H),
+                                null,
+                                new MenuItem ("_Select All", "", () => SelectAll(), shortcut: Key.CtrlMask | Key.T),
+                                //new MenuItem("Autocomplete", "", Autocomplete, shortcut: Key.CtrlMask | Key.Space),
+                            }));
+
+            var formatMenuItem = new List<MenuItem>();
+            formatMenuItem.Add(CreateAllowsTabChecked());
+            if (textEditor.CanFormat)
+            {
+                formatMenuItem.Add(null);
+                formatMenuItem.Add(new MenuItem("Format", "", Format, shortcut: Key.CtrlMask | Key.ShiftMask | Key.R));
+            }
+            menuItems.Add(new MenuBarItem("_Format", formatMenuItem.ToArray()));
+            var viewMenuItem = new List<MenuItem>();
+            if (textEditor.CanSyntaxHighlight)
+            {
+                viewMenuItem.Add(new MenuItem("Syntax Errors", "", () => { SyntaxErrorDialog.Show(textEditor.Errors); }));
+            }
+            if (textEditor._language == LanguageEnum.Powershell)
+            {
+                viewMenuItem.Add(new MenuItem("Errors", "", () => { ErrorDialog.Show(_runspace); }));
+                viewMenuItem.Add(new MenuItem("Variables", "", () => { VariableDialog.Show(_runspace); }));
+            }
+            if (viewMenuItem.Count > 0)
+            {
+                menuItems.Add(new MenuBarItem("_View", viewMenuItem.ToArray()));
+            }
+            if (textEditor.CanRun)
+            {
+                menuItems.Add(new MenuBarItem("_Run", new MenuItem[] {
+                                new MenuItem("Run", "", Run, shortcut: Key.F5),
+                                new MenuItem("Execution Selection", "", ExecuteSelection, shortcut: Key.F8),
+                                new MenuItem("Exit and Run In Console", "", ExitAndRun, shortcut: Key.CtrlMask | Key.ShiftMask | Key.F5),
+                            }));
+            }
+
+            menuItems.Add(new MenuBarItem("_Help", new[] {
+                                new MenuItem("_About", "", () => MessageBox.Query("About", $"PowerShell Pro Tools Terminal Editor\nVersion: {base.MyInvocation.MyCommand.Module.Version.ToString()}\n", "Ok")),
+                                new MenuItem("_GitHub", "", () => {
+                                    try {
+                                        Process.Start(new ProcessStartInfo {
+                                            FileName = "https://github.com/ironmansoftware/psedit",
+                                            UseShellExecute = true
+                                        });
+                                    } catch {}
+                                })
+                            }));
+            if (top.MenuBar is not null)
+            {
+                top.MenuBar.Menus = menuItems.ToArray();
+            }
+            else
+            {
+                var menuBar = new MenuBar(menuItems.ToArray());
+                top.Add(menuBar);
+            }
+
+        }
+
         protected override void ProcessRecord()
         {
             textEditor = new EditorTextView(_runspace);
@@ -135,57 +212,7 @@ namespace psedit
             cursorStatus = new StatusItem(Key.Unknown, "", () => { });
             statusBar = new StatusBar(new StatusItem[] { fileNameStatus, versionStatus, position, cursorStatus, languageStatus });
 
-            top.Add(new MenuBar(new MenuBarItem[] {
-                new MenuBarItem ("_File", new MenuItem [] {
-                        new MenuItem ("_New", "", New),
-                        new MenuItem ("_Open", "", Open, shortcut: Key.CtrlMask | Key.O),
-                        new MenuItem ("_Save", "", () => {
-                            Save(false);
-                        }, shortcut: Key.CtrlMask | Key.S),
-                        new MenuItem ("Save As", "", () => {
-                            Save(true);
-                        }),
-                        new MenuItem ("_Quit", "", Quit, shortcut: Key.CtrlMask | Key.Q)
-                    }),
-                    new MenuBarItem("_Edit", new []
-                    {
-                        new MenuItem ("_Find", "", () => Find(), shortcut: Key.CtrlMask | Key.F),
-                        new MenuItem ("_Replace", "", () => Replace(), shortcut: Key.CtrlMask | Key.H),
-                        null,
-                        new MenuItem ("_Select All", "", () => SelectAll(), shortcut: Key.CtrlMask | Key.T),
-                        //new MenuItem("Autocomplete", "", Autocomplete, shortcut: Key.CtrlMask | Key.Space),
-                    }),
-                    new MenuBarItem("_Format", new []
-                    {
-                        CreateAllowsTabChecked(),
-                        null,
-                        new MenuItem("Format", "", Format, shortcut: Key.CtrlMask | Key.ShiftMask | Key.R)
-                    }),
-                    new MenuBarItem("_View", new []
-                    {
-                        new MenuItem("Errors", "", () => { if (textEditor._language == LanguageEnum.Powershell) ErrorDialog.Show(_runspace); }),
-                        new MenuItem("Syntax Errors", "", () => { if (textEditor.CanSyntaxHighlight) SyntaxErrorDialog.Show(textEditor.Errors); }),
-                        new MenuItem("Variables", "", () => { if (textEditor._language == LanguageEnum.Powershell) VariableDialog.Show(_runspace); }),
-                        //new MenuItem("History", "", () => HistoryDialog.Show(_runspace))
-                    }),
-                    new MenuBarItem("_Debug", new []
-                    {
-                        new MenuItem("Run", "", Run, shortcut: Key.F5),
-                        new MenuItem("Execution Selection", "", ExecuteSelection, shortcut: Key.F8),
-                        new MenuItem("Exit and Run In Console", "", ExitAndRun, shortcut: Key.CtrlMask | Key.ShiftMask | Key.F5),
-                    }),
-                    new MenuBarItem("_Help", new [] {
-                        new MenuItem("_About", "", () => MessageBox.Query("About", $"PowerShell Pro Tools Terminal Editor\nVersion: {base.MyInvocation.MyCommand.Module.Version.ToString()}\n", "Ok")),
-                        new MenuItem("_GitHub", "", () => {
-                            try {
-                                Process.Start(new ProcessStartInfo {
-                                    FileName = "https://github.com/ironmansoftware/psedit",
-                                    UseShellExecute = true
-                                });
-                            } catch {}
-                        })
-                    })
-                }));
+            SetMenuBar(top);
 
             top.KeyPress += (e) => {
                 var keys = ShortcutHelper.GetModifiersKey(e.KeyEvent);
@@ -253,6 +280,7 @@ namespace psedit
                     textEditor.SetLanguage(LanguageEnum.Text);
                     break;
             }
+            SetMenuBar(top);
         }
 
         private void Format()
@@ -466,6 +494,7 @@ namespace psedit
             _originalText = new System.IO.MemoryStream().ToArray();
             textEditor.Text = _originalText;
             textEditor.SetLanguage(LanguageEnum.Powershell);
+            SetMenuBar(top);
         }
 
         private bool Save(bool saveAs)
