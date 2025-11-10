@@ -12,7 +12,7 @@ namespace psedit
 {
     public class YamlEditorContext : EditorContext
     {
-        private Dictionary<Point, Color> tokens;
+        private List<ParseResult> parsedTokens;
         private List<ErrorParseResult> parsedErrors = new List<ErrorParseResult>();
         public YamlEditorContext(int TabWidth)
         {
@@ -20,7 +20,7 @@ namespace psedit
             CanFormat = true;
             CanSyntaxHighlight = true;
         }
-    public Terminal.Gui.Color GetColor(ParsingEvent token)
+        public Terminal.Gui.Color GetColor(ParsingEvent token)
         {
             var theme = ThemeService.Instance;
             switch (token)
@@ -49,10 +49,9 @@ namespace psedit
                     return theme.GetColor("Foreground");
             }
         }
-    public Dictionary<Point, Color> ParseYamlToken(string text, List<List<Rune>> Runes)
+        public List<ParseResult> ParseYamlToken(string text, List<List<Rune>> Runes)
         {
-            List<ParseResult> resultList = new List<ParseResult>();
-            Dictionary<Point, Color> returnList = new Dictionary<Point, Color>();
+            List<ParseResult> returnValue = new List<ParseResult>();
             var reader = new StringReader(text);
             var parser = new YamlDotNet.Core.Parser(reader);
             int oldPos = 1;
@@ -80,11 +79,10 @@ namespace psedit
                         oldPos = 1;
                     }
                     var startIndex = parser.Current != null ? (int)parser.Current.Start.Column : oldPos + 1;
-                    var endIndex = parser.Current != null ? (int)parser.Current.End.Column -1 : oldPos + 1;
+                    var endIndex = parser.Current != null ? (int)parser.Current.End.Column - 1 : oldPos + 1;
                     var color = GetColor(token);
                     var result = new ParseResult { StartIndex = startIndex, EndIndex = endIndex, Color = color, LineNumber = lineNumber };
-                    Debug.WriteLine($"YAML Token: {token} Line: {lineNumber} StartIndex: {startIndex} EndIndex: {endIndex} Color: {color}");
-                    resultList.Add(result);
+                    returnValue.Add(result);
                     oldPos = endIndex;
                 }
                 catch (YamlDotNet.Core.YamlException ex)
@@ -113,28 +111,7 @@ namespace psedit
                     oldPos = (int)endIndex;
                 }
             }
-            for (int idxRow = 0; idxRow < Runes.Count; idxRow++)
-            {
-                var line = EditorExtensions.GetLine(Runes, idxRow);
-                var tokenCol = 1;
-                int lineRuneCount = line.Count;
-                var rowTokens = resultList.Where(p => (p.LineNumber == idxRow + 1));
-                for (int idxCol = 0; idxCol < lineRuneCount; idxCol++)
-                {
-                    var rune = idxCol >= lineRuneCount ? ' ' : line[idxCol];
-                    var cols = Rune.ColumnWidth(rune);
-                    var match = rowTokens.Where(p => (tokenCol >= p.StartIndex && tokenCol <= p.EndIndex)).FirstOrDefault();
-                    var color = Color.Green;
-                    if (match != null)
-                    {
-                        color = match.Color;
-                    }
-                    tokenCol++;
-                    var point = new Point(idxCol + 1, idxRow + 1);
-                    returnList.Add(point, color);
-                }
-            }
-            return returnList;
+            return returnValue;
         }
         public override void ParseText(int height, int topRow, int left, int right, string text, List<List<Rune>> Runes)
         {
@@ -147,7 +124,7 @@ namespace psedit
                 parsedErrors.Clear();
                 Errors.Clear();
                 ColumnErrors.Clear();
-                tokens = ParseYamlToken(text, Runes);
+                parsedTokens = ParseYamlToken(text, Runes);
             }
             Dictionary<Point, Terminal.Gui.Color> returnDict = new Dictionary<Point, Terminal.Gui.Color>();
             int bottom = topRow + height;
@@ -166,6 +143,7 @@ namespace psedit
                 int lineRuneCount = line.Count;
                 var col = left;
                 var tokenCol = 1 + left;
+                var rowTokens = parsedTokens.Where(p => (p.LineNumber == idxRow + 1));
                 var rowErrors = parsedErrors.Where(e => e.LineNumber == idxRow + 1);
                 for (int idxCol = left; idxCol < lineRuneCount; idxCol++)
                 {
@@ -178,12 +156,17 @@ namespace psedit
                     {
                         ColumnErrors.TryAdd(new Point(idxCol, idxRow), colError.ErrorMessage);
                     }
-                    var yamlParseMatch = tokens[new Point(tokenCol, idxRow + 1)];
+                    var yamlParseMatch = rowTokens.Where(p => (tokenCol >= p.StartIndex && tokenCol <= p.EndIndex)).FirstOrDefault();
+                    var color = Color.Green;
+                    if (yamlParseMatch != null)
+                    {
+                        color = yamlParseMatch.Color;
+                    }
                     count++;
                     var rune = idxCol >= lineRuneCount ? ' ' : line[idxCol];
                     var cols = Rune.ColumnWidth(rune);
                     var point = new Point(idxCol, row);
-                    returnDict.Add(point, yamlParseMatch);
+                    returnDict.Add(point, color);
                     tokenCol++;
                     if (!EditorExtensions.SetCol(ref col, right, cols))
                     {
