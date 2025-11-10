@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -11,11 +11,12 @@
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
       <PackageReference Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
-
   <ItemGroup>
     <None Include="psedit.psd1">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
+	<Target Name="PublishForDebugging" AfterTargets="Build" Condition="'$(Configuration)'=='Debug' and '$(BuildingInsideVisualStudio)'=='true'">
+		<Exec Command="dotnet publish &quot;$(MSBuildProjectFullPath)&quot; -c $(Configuration) -f $(TargetFramework) -o &quot;$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\publish&quot;" />
+	</Target>
 </Project>

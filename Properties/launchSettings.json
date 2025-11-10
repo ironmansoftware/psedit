@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "pwsh": {
+      "commandName": "Executable",
+      "executablePath": "pwsh",
+      "commandLineArgs": "-NoExit -Command & { Import-Module .\\\\psedit.psd1; Show-PSEditor }",
+      "workingDirectory": "$(ProjectDir)bin\\$(Configuration)\\$(TargetFramework)\\publish"
+    },
+    "powershell": {
+      "commandName": "Executable",
+      "executablePath": "powershell",
+      "commandLineArgs": "-NoExit -Command & { Import-Module .\\\\psedit.psd1; Show-PSEditor }",
+      "workingDirectory": "$(ProjectDir)bin\\$(Configuration)\\$(TargetFramework)\\publish"
+    }
+  }
+}
