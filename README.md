@@ -53,7 +53,7 @@ All other text based files are supported, and will be treated as plain text file
 
 (* Requires `PSScriptAnalyzer` to be installed)
 
-You can format your code in the editor if you have `PSScriptAnalyzer` installed. To format a script, either press `Ctrl+Shift+R` or click Edit \ Format. If you don't have `PSScriptAnalyzer` installed, you can do so with the command below.
+You can only format your PowerShell code in the editor if you have `PSScriptAnalyzer` installed. To format a script, either press `Ctrl+Shift+R` or click Edit \ Format. If you don't have `PSScriptAnalyzer` installed, you can do so with the command below.
 
 ```powershell
 Install-Module PSScriptAnalyzer
