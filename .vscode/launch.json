@@ -5,22 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "PSEdit: Launch with Example Theme",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build",
-            "program": "pwsh",
-            "args": [
-                "-NoExit",
-                "-Command",
-                "& { Import-Module .\\psedit.psd1; Show-PSEditor -ConfigurationFile ..\\psedit.json }"
-            ],
-            "cwd": "${workspaceFolder}\\bin\\Debug\\netstandard2.0\\publish",
-            "console": "externalTerminal",
-            "stopAtEntry": false
-        },
-        {
-            "name": ".NET Core Launch with Example Theme",
+            "name": "PSEdit (Pwsh): Launch with Example Theme",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
@@ -35,7 +20,37 @@
             "stopAtEntry": false
         },
         {
-            "name": ".NET Launch (console)",
+            "name": "PSEdit (PowerShell): Launch with Example Theme",
+            "type": "clr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "powershell",
+            "args": [
+                "-NoExit",
+                "-Command",
+                "& { Import-Module .\\psedit.psd1; Show-PSEditor -ConfigurationFile ${workspaceFolder}\\example.psedit.json }"
+            ],
+            "cwd": "${workspaceFolder}\\bin\\Debug\\netstandard2.0\\publish",
+            "console": "externalTerminal",
+            "stopAtEntry": false
+        },
+        {
+            "name": "PSEdit (Pwsh): Launch (console)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "pwsh",
+            "args": [
+                "-NoExit",
+                "-Command",
+                "& { Import-Module .\\psedit.psd1; Show-PSEditor}"
+            ],
+            "cwd": "${workspaceFolder}\\bin\\Debug\\netstandard2.0\\publish",
+            "console": "externalTerminal",
+            "stopAtEntry": false
+        },
+        {
+            "name": "PSEdit (PowerShell): Launch (console)",
             "type": "clr",
             "request": "launch",
             "preLaunchTask": "build",
