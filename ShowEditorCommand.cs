@@ -78,7 +78,7 @@ namespace psedit
                 }
             }
             // Load theme from specified config file or default location
-            if (File.Exists(configPath))
+            if (!String.IsNullOrEmpty(configPath))
             {
                 ThemeService.Instance.LoadTheme(configPath);
             }
