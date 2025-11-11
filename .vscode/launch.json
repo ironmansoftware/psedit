@@ -13,7 +13,7 @@
             "args": [
                 "-NoExit",
                 "-Command",
-                "& { Import-Module .\\psedit.psd1; Show-PSEditor -ConfigurationFile ..\\psedit.json }"
+                "& { Import-Module .\\psedit.psd1; Show-PSEditor -ConfigurationFile ${workspaceFolder}\\example.psedit.json }"
             ],
             "cwd": "${workspaceFolder}\\bin\\Debug\\netstandard2.0\\publish",
             "console": "externalTerminal",
