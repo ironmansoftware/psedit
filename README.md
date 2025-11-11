@@ -1,15 +1,9 @@
-## PSEdit
+﻿## PSEdit
 
-Edit PowerShell scripts directly in your terminal. 
+Edit PowerShell scripts & JSON/YAML files directly in your terminal. 
 
-![](./screenshot.png)
+![](./psedit_demo.gif)
 
-- IntelliSense
-- Syntax Higlighting
-- Format on Save
-- Script Execution
-- Error View
-- Syntax Error View
 
 ## Installation
 
@@ -18,7 +12,6 @@ This module is available on the [PowerShell Gallery](https://www.powershellgalle
 ```powershell
 Install-Module psedit
 ```
-
 ## Editing
 
 To start the editor, you can simply call `Show-PSEditor` in a terminal.
@@ -33,11 +26,32 @@ You can open a file by using the `-Path` parameter.
 Show-PSEditor -Path .\file.path
 ```
 
-### Syntax Errors
+You can also use the `psedit` alias.
+```powershell
+psedit
+```
 
-Syntax errors will be shown in the editor by a red highlight. To view the text of the syntax error, click View \ Syntax Errors.
 
-### Formatting
+## Features
+
+- IntelliSense
+- Syntax Higlighting
+- Format on Save
+- Script Execution
+- Error View
+- Syntax Error View
+
+## Language support
+
+| Language      | IntelliSense | Syntax Highlighting | Formatting | Run Code |
+| ------------- | ------------ | ------------------- | ---------- | -------- |
+| PowerShell    | ✔           | ✔                  | ✔*          | ✔       |
+| JSON          | ✖️           | ✔                  | ✔          |          |
+| YAML          | ✖️           | ✔                  | ✔          |          |
+
+All other text based files are supported, and will be treated as plain text files.
+
+(* Requires `PSScriptAnalyzer` to be installed)
 
 You can format your code in the editor if you have `PSScriptAnalyzer` installed. To format a script, either press `Ctrl+Shift+R` or click Edit \ Format. If you don't have `PSScriptAnalyzer` installed, you can do so with the command below.
 
@@ -45,9 +59,20 @@ You can format your code in the editor if you have `PSScriptAnalyzer` installed.
 Install-Module PSScriptAnalyzer
 ```
 
-## Theme Support
+### Syntax Errors
 
-PSEdit supports customizable themes via a `psedit.json` file in the working directory. If the file is not present, a default theme is used. The theme file allows you to override editor colors for backgrounds, text, errors, and more.
+Syntax errors will be shown in the editor by a red highlight. To view the text of the syntax error, click View \ Syntax Errors.
+
+### Theme Support
+
+PSEdit supports customizable themes via a `psedit.json` file in My Documents folder, or in the working directory.
+
+You can also provide a ConfigurationFile parameter to `psedit` to specify a custom location for the theme file.
+```powershell
+psedit -ConfigurationFile ".\mytheme.json"
+```
+
+If the file is not present, a default theme is used. The theme file allows you to override editor colors for backgrounds, text, errors, and more.
 
 ### Example psedit.json
 
@@ -71,7 +96,7 @@ PSEdit supports customizable themes via a `psedit.json` file in the working dire
 
 If a color key is missing, the default value will be used. Changes to the theme file are loaded automatically when the editor starts.
 
-## Execution
+## Running code
 
 To execute your script, press `F5` to run the entire script. If you want to execute a select, you can press `F8`. You can also execute the script in the terminal and exit the editor by pressing `Ctrl+Shift+F5`.
 
