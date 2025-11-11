@@ -51,14 +51,33 @@ namespace psedit
         public SwitchParameter DisableFormatOnSave { get; set; }
 
         protected override void BeginProcessing()
-        {            
-            // Load theme from specified config file or default location
-            string configPath = ConfigurationFile;
-            if (string.IsNullOrEmpty(configPath))
+        {
+            string configPath = "";
+            if (!string.IsNullOrEmpty(ConfigurationFile))
             {
-                var documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                configPath = System.IO.Path.Combine(documents, "psedit.json");
+                // evaluate provided config path
+                configPath = GetUnresolvedProviderPathFromPSPath(ConfigurationFile);
+                if (!File.Exists(configPath))
+                {
+                    throw new ArgumentException("Invalid filepath provided for Configuration File");
+                }
             }
+            else
+            {
+                // evaluate if theme exists in My Documents
+                var myDocumentsThemePath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "psedit.json");
+                if (File.Exists(myDocumentsThemePath))
+                {
+                    configPath = myDocumentsThemePath;
+                }
+                // evaluate if theme exists in working directory
+                var workingDirectoryThemePath = GetUnresolvedProviderPathFromPSPath("psedit.json");
+                if (File.Exists(workingDirectoryThemePath))
+                {
+                    configPath = workingDirectoryThemePath;
+                }
+            }
+            // Load theme from specified config file or default location
             if (File.Exists(configPath))
             {
                 ThemeService.Instance.LoadTheme(configPath);
