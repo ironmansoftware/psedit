@@ -364,7 +364,7 @@ namespace psedit
                     });
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 // do nothing
             }
@@ -504,7 +504,7 @@ namespace psedit
                     return result;
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 return text;
             }
