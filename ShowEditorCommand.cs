@@ -88,13 +88,15 @@ namespace psedit
             currentDirectory = SessionState.Path.CurrentLocation.Path;
             // populate the allowed file types for dialogs on startup
             _allowedFileTypes.Add(".ps1");
+            _allowedFileTypes.Add(".json");
+            _allowedFileTypes.Add(".xml");
+            _allowedFileTypes.Add(".yml");
+            _allowedFileTypes.Add(".txt");
             _allowedFileTypes.Add(".psm1");
             _allowedFileTypes.Add(".psd1");
-            _allowedFileTypes.Add(".json");
-            _allowedFileTypes.Add(".txt");
             _allowedFileTypes.Add(".yaml");
-            _allowedFileTypes.Add(".yml");
-
+            _allowedFileTypes.Add(".config");
+            _allowedFileTypes.Add(".csproj");
             // ...existing code...
         }
 
@@ -295,11 +297,17 @@ namespace psedit
                 case ".yml": case ".yaml":
                     textEditor.SetLanguage(LanguageEnum.YAML);
                     break;
+                case ".xml": case ".config": case ".csproj":
+                    textEditor.SetLanguage(LanguageEnum.XML);
+                    break;
                 default:
                     textEditor.SetLanguage(LanguageEnum.Text);
                     break;
             }
-            SetMenuBar(top);
+            if (top != null)
+            {
+                SetMenuBar(top);
+            }
         }
 
         private void Format()

@@ -5,6 +5,7 @@ namespace psedit
     Text,
     Powershell,
     JSON,
-    YAML
+    YAML,
+    XML
     }
 }

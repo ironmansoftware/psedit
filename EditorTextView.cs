@@ -47,6 +47,10 @@ namespace psedit
             {
                 editorContext = new YamlEditorContext(TabWidth);
             }
+            else if (language == LanguageEnum.XML)
+            {
+                editorContext = new XmlEditorContext(TabWidth);
+            }
             else
             {
                 editorContext = null;
