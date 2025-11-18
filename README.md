@@ -1,6 +1,6 @@
 ﻿## PSEdit
 
-Edit PowerShell scripts & JSON/YAML files directly in your terminal. 
+Edit PowerShell scripts & JSON/XML/YAML files directly in your terminal. 
 
 ![](./psedit_demo.gif)
 
@@ -48,6 +48,7 @@ psedit
 | PowerShell    | ✔           | ✔                  | ✔*          | ✔       |
 | JSON          | ✖️           | ✔                  | ✔          |          |
 | YAML          | ✖️           | ✔                  | ✔          |          |
+| XML          | ✖️           | ✔                  | ✔          |          |
 
 All other text based files are supported, and will be treated as plain text files.
 
