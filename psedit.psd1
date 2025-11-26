@@ -1,7 +1,7 @@
 
 @{
     RootModule      = 'psedit.dll'
-    ModuleVersion   = '1.0.0'
+    ModuleVersion   = '1.1.0'
     GUID            = 'beb23c4b-3e9a-4be3-ad4e-0c38d448353c'
     Author          = 'Adam Driscoll'
     CompanyName     = 'Ironman Software'
