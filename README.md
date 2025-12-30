@@ -49,6 +49,7 @@ psedit
 | JSON          | ✖️           | ✔                  | ✔          |          |
 | YAML          | ✖️           | ✔                  | ✔          |          |
 | XML          | ✖️           | ✔                  | ✔          |          |
+| Markdown      |            | ✔                 |             |          |
 
 All other text based files are supported, and will be treated as plain text files.
 
