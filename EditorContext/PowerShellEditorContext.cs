@@ -197,7 +197,7 @@ namespace psedit
         public override void ParseText(int height, int topRow, int left, int right, string text, List<List<Rune>> Runes)
         {
             // quick exit when text is the same and the top row / right col has not changed
-            if (_originalText == text && topRow == _lastParseTopRow && right == _lastParseRightColumn)
+            if (_originalText == text && topRow == _lastParseTopRow && right == _lastParseRightColumn && _lastParseHeight == height)
             {
                 return;
             }
@@ -217,6 +217,7 @@ namespace psedit
             int bottom = topRow + height;
             _originalText = text;
             _lastParseTopRow = topRow;
+            _lastParseHeight = height;
             _lastParseRightColumn = right;
             var row = 0;
             for (int idxRow = topRow; idxRow < Runes.Count; idxRow++)

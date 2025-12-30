@@ -9,6 +9,7 @@ namespace psedit
     {
         public string _originalText;
         public int _lastParseTopRow;
+        public int _lastParseHeight;
         public int _lastParseRightColumn;
         public int _tabWidth;
         public bool CanFormat = false;
