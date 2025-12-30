@@ -51,6 +51,10 @@ namespace psedit
             {
                 editorContext = new XmlEditorContext(TabWidth);
             }
+            else if (language == LanguageEnum.Markdown)
+            {
+                editorContext = new MarkdownEditorContext(TabWidth);
+            }
             else
             {
                 editorContext = null;

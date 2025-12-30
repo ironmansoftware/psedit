@@ -6,6 +6,7 @@ namespace psedit
     Powershell,
     JSON,
     YAML,
-    XML
+    XML,
+    Markdown
     }
 }

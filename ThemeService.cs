@@ -74,7 +74,10 @@ public class Theme
             { "Accent", Color.Cyan },
             { "Error", Color.Red },
             { "Warning", Color.BrightYellow },
-            { "Info", Color.BrightBlue }
+            { "Info", Color.BrightBlue },
+            { "String", Color.White },
+            { "Comment", Color.Green },
+            { "Secondary", Color.Gray }
         }
     };
 }

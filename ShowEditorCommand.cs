@@ -97,6 +97,7 @@ namespace psedit
             _allowedFileTypes.Add(".yaml");
             _allowedFileTypes.Add(".config");
             _allowedFileTypes.Add(".csproj");
+            _allowedFileTypes.Add(".md");
             // ...existing code...
         }
 
@@ -299,6 +300,9 @@ namespace psedit
                     break;
                 case ".xml": case ".config": case ".csproj":
                     textEditor.SetLanguage(LanguageEnum.XML);
+                    break;
+                case ".md":
+                    textEditor.SetLanguage(LanguageEnum.Markdown);
                     break;
                 default:
                     textEditor.SetLanguage(LanguageEnum.Text);
