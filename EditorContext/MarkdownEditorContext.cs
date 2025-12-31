@@ -28,6 +28,7 @@ namespace psedit
                 for (int lineIndex = 0; lineIndex < lines.Length; lineIndex++)
                 {
                     var line = lines[lineIndex];
+                    line = line.TrimStart('\uFEFF');
                     int lineNumber = lineIndex + 1;
                     
                     // Check for code block delimiters (```)
