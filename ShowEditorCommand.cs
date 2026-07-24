@@ -132,10 +132,18 @@ namespace psedit
                                 new MenuItem ("_Quit", "", Quit, shortcut: Key.CtrlMask | Key.Q)
                             }));
             menuItems.Add(new MenuBarItem("_Edit", new MenuItem[] {
-                                new MenuItem ("_Find", "", () => Find(), shortcut: Key.CtrlMask | Key.F),
-                                new MenuItem ("_Replace", "", () => Replace(), shortcut: Key.CtrlMask | Key.H),
+                                new MenuItem ("_Undo", "", () => textEditor.Undo(), shortcut: Key.CtrlMask | Key.Z),
+                                new MenuItem ("_Redo", "", () => textEditor.Redo(), shortcut: Key.CtrlMask | Key.R),
+                                null,
+                                new MenuItem ("Cu_t", "", () => textEditor.Cut(), shortcut: Key.CtrlMask | Key.X),
+                                new MenuItem ("_Copy", "", () => textEditor.Copy(), shortcut: Key.CtrlMask | Key.C),
+                                new MenuItem ("_Paste", "", () => textEditor.Paste(), shortcut: Key.CtrlMask | Key.Y),
                                 null,
                                 new MenuItem ("_Select All", "", () => SelectAll(), shortcut: Key.CtrlMask | Key.T),
+                                new MenuItem ("_Delete All", "", () => textEditor.DeleteAll(), shortcut: Key.CtrlMask | Key.G),
+                                null,
+                                new MenuItem ("_Find", "", () => Find(), shortcut: Key.CtrlMask | Key.F),
+                                new MenuItem ("_Replace", "", () => Replace(), shortcut: Key.CtrlMask | Key.H),
                                 //new MenuItem("Autocomplete", "", Autocomplete, shortcut: Key.CtrlMask | Key.Space),
                             }));
 
@@ -171,6 +179,8 @@ namespace psedit
             }
 
             menuItems.Add(new MenuBarItem("_Help", new[] {
+                                new MenuItem("_Keyboard Shortcuts", "", ShowKeyboardShortcuts),
+                                null,
                                 new MenuItem("_About", "", () => MessageBox.Query("About", $"PowerShell Pro Tools Terminal Editor\nVersion: {base.MyInvocation.MyCommand.Module.Version.ToString()}\n", "Ok")),
                                 new MenuItem("_GitHub", "", () => {
                                     try {
@@ -191,6 +201,20 @@ namespace psedit
                 top.Add(menuBar);
             }
 
+        }
+
+        private void ShowKeyboardShortcuts()
+        {
+            MessageBox.Query("Keyboard Shortcuts",
+                "File:   Open Ctrl+O, Save Ctrl+S, Quit Ctrl+Q\n" +
+                "Edit:   Undo Ctrl+Z, Redo Ctrl+R\n" +
+                "        Cut Ctrl+X, Copy Ctrl+C, Paste Ctrl+Y\n" +
+                "        Select All Ctrl+T, Delete All Ctrl+G\n" +
+                "        Find Ctrl+F, Replace Ctrl+H\n" +
+                "Format: Format Ctrl+Shift+R\n" +
+                "Run:    Run F5, Execute Selection F8\n" +
+                "        Exit and Run Ctrl+Shift+F5",
+                "Ok");
         }
 
         protected override void ProcessRecord()

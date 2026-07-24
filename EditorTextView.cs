@@ -78,6 +78,14 @@ namespace psedit
         {
             Text = editorContext.Format(Text.ToString());
         }
+        public void Undo()
+        {
+            InvokeKeybindings(new KeyEvent(Key.CtrlMask | Key.Z, new KeyModifiers { Ctrl = true }));
+        }
+        public void Redo()
+        {
+            InvokeKeybindings(new KeyEvent(Key.CtrlMask | Key.R, new KeyModifiers { Ctrl = true }));
+        }
         public string Run(string path, bool exit = false)
         {
             var output = String.Empty;
